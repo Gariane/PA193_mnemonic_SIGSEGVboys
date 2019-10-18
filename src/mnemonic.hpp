@@ -16,13 +16,12 @@ class Mnemonic {
     Mnemonic(binData entropy, const std::string& dictionaryPath);
     Mnemonic(const std::vector<std::string>& phrase, const std::string& dictionaryPath);
 
-    binData getPhrase() const;
-    binData getSeed() const;
     binData getEntropy() const;
+    std::string getPhrase() const;
+    std::string getSeed() const;
     
-    static bool checkPhraseSeedPair(const std::vector<std::string>& phrase, const binData& seed, const std::string& dictionaryPath);
+    static bool checkPhraseSeedPair(const std::vector<std::string>& phrase, const std::string& seed, const std::string& dictionaryPath);
 };
-
 
 } // end namespace libmnemonic
 
