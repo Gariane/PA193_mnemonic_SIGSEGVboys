@@ -13,6 +13,24 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
     add_definitions("-D_CRT_SECURE_NO_WARNINGS")
 endif()
 
+if (ENABLE_VALGRIND)
+    find_program(VALGRIND_BIN valgrind)
+
+    if(VALGRIND_BIN STREQUAL "VALGRIND_BIN-NOTFOUND")
+        message(FATAL_ERROR "Valgrind is not installed!")
+    endif()
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
+    set(VALGRIND_FLAGS "--leak-check=full --show-reachable=yes --error-exitcode=1")
+
+    add_custom_target(
+        valgrind
+        COMMAND "${VALGRIND_BIN} ${VALGRIND_FLAGS} ./${testBin}"
+        COMMENT "Running valgrind on testsuite"
+        DEPENDS "./${testBin}" 
+      )
+endif()
+
 set(testBin "testsuite")
 
 include_directories(src tests)
@@ -27,3 +45,4 @@ add_custom_target(
     COMMENT "Running testsuite"
     DEPENDS "./${testBin}" 
   )
+

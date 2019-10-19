@@ -10,6 +10,7 @@ before_script:
 
 matrix:
   include:
+    # gcc compilation
     - os: linux
       compiler: gcc
       env:
@@ -25,6 +26,7 @@ matrix:
         - make all 
         - make test
 
+    # clang compilation
     - os: linux
       compiler: clang
       env:
@@ -41,6 +43,7 @@ matrix:
         - make all
         - make test
 
+    # clang tidy analysis
     - os: linux
       env:
         - TEST="ClangTidy analysis"
@@ -54,6 +57,7 @@ matrix:
       script:
         - clang-tidy -header-filter=.* ../src/*.cpp -- -std=c++17
 
+    # cppcheck analysis
     - os: linux
       env:
         - TEST="CppCheck analysis"
@@ -64,3 +68,19 @@ matrix:
       script:
         - cppcheck --version
         - cppcheck --error-exitcode=1 --enable=all ../src/*.hpp ../src/*.cpp
+
+    # valgrind
+    - os: linux
+      env:
+        - TEST="Valgrind"
+      addons:
+        apt:
+          sources:
+            - sourceline: "ppa:ubuntu-toolchain-r/test"
+          packages:
+            - g++-9
+            - valgrind
+      script:
+        - cmake .. -DCMAKE_C_COMPILER=gcc-9 -DCMAKE_CXX_COMPILER=g++-9
+        - make all
+        - make valgrind
