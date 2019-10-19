@@ -56,3 +56,16 @@ matrix:
           else
               echo -e "\033[1;32m\xE2\x9C\x93 passed:\033[0m $1";
           fi
+     
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+          packages:
+            - clang-8
+      script:
+        - cmake -DENABLE_CPPCHECK=ON -DCMAKE_CXX_COMPILER="clang++-8" ..
+        - make
+        - make check
