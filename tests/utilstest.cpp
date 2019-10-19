@@ -9,7 +9,8 @@ TEST_CASE("BIP39::Dictionary - invalid path") {
 }
 
 TEST_CASE("BIP39::Dictionary - ASCII files") {
-    BIP39::Dictionary dict("wordlists/english.txt");
+    // "../" because this is ran from build/ directory in CI
+    BIP39::Dictionary dict("../wordlists/english.txt");
     SECTION("Index to word and back") {
         for (int i = 0; i < 2048; i++) {
             std::wstring current;

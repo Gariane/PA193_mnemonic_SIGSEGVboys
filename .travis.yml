@@ -1,0 +1,103 @@
+language: cpp
+dist: bionic 
+
+branch:
+  - master
+
+before_script:
+  - mkdir build
+  - cd build
+
+matrix:
+  include:
+    # gcc compilation
+    - os: linux
+      compiler: gcc
+      env:
+        - TEST="GCC 9 compilation"
+      addons:
+        apt:
+          sources:
+            - sourceline: "ppa:ubuntu-toolchain-r/test"
+          packages:
+            - g++-9
+      script:
+        - cmake .. -DCMAKE_C_COMPILER=gcc-9 -DCMAKE_CXX_COMPILER=g++-9
+        - make all 
+
+    # clang compilation
+    - os: linux
+      compiler: clang
+      env:
+        - TEST="Clang-8 compilation"
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+          packages:
+            - clang-8
+      script:
+        - cmake .. -DCMAKE_C_COMPILER=clang-8 -DCMAKE_CXX_COMPILER=clang++-8
+        - make all
+
+    # run tests
+    - os: linux
+      compiler: clang
+      env:
+        - TEST="Running testsuite"
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+          packages:
+            - clang-8
+      script:
+        - cmake .. -DCMAKE_C_COMPILER=clang-8 -DCMAKE_CXX_COMPILER=clang++-8
+        - make test 
+
+    # clang tidy analysis
+    - os: linux
+      env:
+        - TEST="ClangTidy analysis"
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+          packages:
+            - clang-tidy
+      script:
+        - clang-tidy -header-filter=.* ../src/*.cpp -- -std=c++17
+
+    # cppcheck analysis
+    - os: linux
+      env:
+        - TEST="CppCheck analysis"
+      addons:
+        apt: 
+          packages:
+            - cppcheck 
+      script:
+        - cppcheck --version
+        - cppcheck --error-exitcode=1 --enable=all ../src/*.hpp ../src/*.cpp
+
+    # valgrind
+    - os: linux
+      env:
+        - TEST="Valgrind"
+      addons:
+        apt:
+          sources:
+            - sourceline: "ppa:ubuntu-toolchain-r/test"
+            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+          packages:
+            - clang-8
+            - valgrind
+      script:
+        - cmake .. -DENABLE_VALGRIND=ON -DCMAKE_C_COMPILER=clang-8 -DCMAKE_CXX_COMPILER=clang++-8
+        - make all
+        - valgrind --version
+        - valgrind --leak-check=full --show-reachable=yes --track-origins=yes --error-exitcode=1 ./testsuite
