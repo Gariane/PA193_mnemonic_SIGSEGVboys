@@ -4,12 +4,8 @@
 #include <algorithm>
 #include <array>
 #include <fstream>
-#include <iostream>
 #include <locale>
 #include <string>
-#include <vector>
-#include <functional>
-#include <typeinfo>
 
 #define DICTIONARY_SIZE 2048
 
@@ -18,6 +14,24 @@ namespace BIP39 {
 class Dictionary {
     std::array<std::wstring, DICTIONARY_SIZE> keyWords;
     bool sorted;
+
+
+    bool check_uniqueness(int size, const std::wstring& item) {
+        auto start = keyWords.begin();
+        auto end = keyWords.begin() + size;
+        auto search = std::find(start, end, item);
+        return search == end;
+    }
+
+
+    bool checkWhiteSpaces(const std::wstring& checked, const std::locale& loc) {
+        for (wchar_t chr : checked) {
+            if (std::isspace(chr, loc)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     void parseFile(const std::string& path) {
         std::wifstream input(path);
@@ -30,18 +44,19 @@ class Dictionary {
         int count = 0;
         while (!input.eof()) {
             std::getline(input, current);
-            if (input.eof()) {
+            if (input.eof() || input.bad()) {
                 break;
             }
             if (count >= DICTIONARY_SIZE) {
                 throw std::length_error(
                     "Dictionary too long (2048 keywords expected)");
             }
-            for (wchar_t chr : current) {
-                if (std::isspace(chr, loc)) {
-                    throw std::invalid_argument("Invalid character on line " +
-                                                std::to_string(count));
-                }
+            if ( !checkWhiteSpaces(current, loc) ) {
+                throw std::invalid_argument("Invalid character on line " +
+                                                std::to_string(count + 1));
+            }
+            if ( !check_uniqueness(count , current) ) {
+                throw std::invalid_argument("Duplicate word on line " + std::to_string(count + 1));
             }
             keyWords[count] = current;
             count++;
@@ -50,9 +65,7 @@ class Dictionary {
             throw std::length_error(
                 "Dictionary too short (2048 keywords expected)");
         }
-        auto begin = keyWords.begin();
-        auto end = keyWords.end();
-        if ( !(sorted = std::is_sorted(begin, end)) ) {
+        if ( !(sorted = std::is_sorted(keyWords.begin(), keyWords.end())) ) {
             sorted = false;
         }
     }
@@ -66,19 +79,16 @@ class Dictionary {
     }
 
     unsigned getIndex(const std::wstring& keyword) const {
+        auto iterator = keyWords.begin();
         if ( sorted ) {
-            auto iterator = std::lower_bound(keyWords.begin(), keyWords.end(), keyword);
-            if ( iterator == keyWords.end() ) {
-                throw std::out_of_range("Keyword not present in dictionary");
-            }
-            return std::distance(keyWords.begin(), iterator);
+            iterator = std::lower_bound(keyWords.begin(), keyWords.end(), keyword);
         } else {
-            auto iterator = std::find(keyWords.begin(), keyWords.end(), keyword);
-            if ( iterator == keyWords.end() ) {
-                throw std::out_of_range("Keyword not present in dictionary");
-            }
-            return std::distance(keyWords.begin(), iterator);
+            iterator = std::find(keyWords.begin(), keyWords.end(), keyword);
         }
+        if ( iterator == keyWords.end() ) {
+            throw std::out_of_range("Keyword not present in dictionary");
+        }
+        return std::distance(keyWords.begin(), iterator);
     }
 };
 
