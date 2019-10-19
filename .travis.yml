@@ -98,4 +98,6 @@ matrix:
             - valgrind
       script:
         - cmake .. -DENABLE_VALGRIND=ON -DCMAKE_C_COMPILER=clang-8 -DCMAKE_CXX_COMPILER=clang++-8
-        - make valgrind
+        - make all
+        - valgrind --version
+        - valgrind --leak-check=full --show-reachable=yes --track-origins=yes --error-exitcode=1 ./testsuite

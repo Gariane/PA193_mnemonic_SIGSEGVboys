@@ -21,14 +21,6 @@ if (ENABLE_VALGRIND)
     endif()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
-    set(VALGRIND_FLAGS "--leak-check=full --show-reachable=yes --error-exitcode=1")
-
-    add_custom_target(
-        valgrind
-        COMMAND "${VALGRIND_BIN} ${VALGRIND_FLAGS} ./${testBin}"
-        COMMENT "Running valgrind on testsuite"
-        DEPENDS "./${testBin}" 
-      )
 endif()
 
 set(testBin "testsuite")
@@ -37,7 +29,6 @@ include_directories(src tests)
 add_library(bip39 src/mnemonic.hpp src/dictionary.hpp src/mnemonic.cpp)
 add_executable(${testBin} src/dictionary.hpp tests/utilstest.cpp tests/catch.hpp tests/tests-main.cpp)
 target_link_libraries(${testBin} bip39)
-
 
 add_custom_target(
     test
