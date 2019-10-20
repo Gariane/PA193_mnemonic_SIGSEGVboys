@@ -39,7 +39,6 @@ add_library(${libName} ${libSources})
 target_link_libraries(${libName} OpenSSL::SSL)
 
 
-
 add_executable(${testBin} ${testSources})
 target_link_libraries(${testBin} bip39)
 
