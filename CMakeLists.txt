@@ -24,10 +24,12 @@ if (ENABLE_VALGRIND)
 endif()
 
 set(testBin "testsuite")
+set(libSources "src/mnemonic.cpp")
+set(testSources "tests/test-main.cpp" "tests/test-utils.cpp" "tests/test-mnemonic.cpp")
 
 include_directories(src tests)
-add_library(bip39 src/mnemonic.hpp src/dictionary.hpp src/mnemonic.cpp)
-add_executable(${testBin} src/dictionary.hpp tests/utilstest.cpp tests/catch.hpp tests/tests-main.cpp)
+add_library(bip39 ${libSources})
+add_executable(${testBin} ${testSources})
 target_link_libraries(${testBin} bip39)
 
 add_custom_target(

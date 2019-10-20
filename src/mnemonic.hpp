@@ -23,7 +23,7 @@ class Mnemonic {
              const BIP39::Dictionary& dictionaryPath);
 
     binData getEntropy() const;
-    std::string getPhrase() const;
+    std::vector<std::string> getPhrase() const;
     std::string getSeed() const;
 
     static bool checkPhraseSeedPair(const std::vector<std::string>& phrase,

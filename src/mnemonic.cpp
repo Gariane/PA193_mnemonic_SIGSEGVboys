@@ -14,7 +14,7 @@ Mnemonic::binData Mnemonic::getEntropy() const {
 
 }
 
-std::string Mnemonic::getPhrase() const {
+std::vector<std::string> Mnemonic::getPhrase() const {
 
 }
 
