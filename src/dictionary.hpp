@@ -1,5 +1,5 @@
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#ifndef DICTIONARY_HPP
+#define DICTIONARY_HPP
 
 #include <algorithm>
 #include <array>
