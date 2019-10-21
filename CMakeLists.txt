@@ -24,11 +24,18 @@ if (ENABLE_VALGRIND)
 endif()
 
 set(testBin "testsuite")
-set(libSources "src/mnemonic.cpp")
 set(testSources "tests/test-main.cpp" "tests/test-utils.cpp" "tests/test-mnemonic.cpp")
 
+set(libName "bip39")
+set(libSources "src/mnemonic.cpp")
+
+find_package(OpenSSL REQUIRED)
 include_directories(src tests)
-add_library(bip39 ${libSources})
+add_library(${libName} ${libSources})
+target_link_libraries(${libName} OpenSSL::SSL)
+
+
+
 add_executable(${testBin} ${testSources})
 target_link_libraries(${testBin} bip39)
 
