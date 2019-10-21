@@ -33,13 +33,9 @@ class Dictionary {
         return true;
     }
 
-    void parseFile(const std::string& path) {
-        std::wifstream input(path);
+    void parseFile(std::wifstream& input) {
         std::locale loc("");
         input.imbue(loc);
-        if (input.fail()) {
-            throw std::invalid_argument("Invalid path: " + path);
-        }
         std::wstring current;
         int count = 0;
         while (!input.eof()) {
@@ -71,7 +67,17 @@ class Dictionary {
     }
 
    public:
-    explicit Dictionary(const std::string& path) : keyWords(), sorted(true) { parseFile(path); }
+    explicit Dictionary(const std::string& path) : keyWords(), sorted(true) {
+        std::wifstream input(path);
+        if (input.fail()) {
+            throw std::invalid_argument("Invalid path: " + path);
+        }
+        parseFile(input);
+    }
+
+    explicit Dictionary(std::wifstream& input) :keyWords(), sorted(true) {
+        parseFile(input);
+    }
 
     // maybe throws an exception when index is out of range, whoknows
     const std::wstring& getWord(unsigned index) const {
