@@ -5,6 +5,7 @@
 #include <array>
 #include <fstream>
 #include <locale>
+#include <codecvt>
 #include <string>
 
 #define DICTIONARY_SIZE 2048
@@ -34,7 +35,7 @@ class Dictionary {
     }
 
     void parseFile(std::wifstream& input) {
-        std::locale loc("");
+        std::locale loc(input.getloc(), new std::codecvt_utf8<wchar_t>);
         input.imbue(loc);
         std::wstring current;
         int count = 0;
@@ -75,7 +76,7 @@ class Dictionary {
         parseFile(input);
     }
 
-    explicit Dictionary(std::wifstream& input) :keyWords(), sorted(true) {
+    explicit Dictionary(std::wifstream& input) : keyWords(), sorted(true) {
         parseFile(input);
     }
 
