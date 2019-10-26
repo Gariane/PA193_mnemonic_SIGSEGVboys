@@ -5,7 +5,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES Clang OR ${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
     # using regular Clang or AppleClang or GCC
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -pedantic -Wold-style-cast -Weffc++")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -pedantic -Wold-style-cast -Weffc++ -g")
     set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
     # using Visual Studio C++

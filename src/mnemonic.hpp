@@ -19,16 +19,20 @@ class Mnemonic {
    public:
     // TBD do we take path to file or filedescriptor directly?
     Mnemonic(binData entropy, const BIP39::Dictionary& dictionaryPath);
-    Mnemonic(const std::vector<std::string>& phrase,
+    Mnemonic(const std::wstring& phrase,
              const BIP39::Dictionary& dictionaryPath);
 
     binData getEntropy() const;
-    std::vector<std::string> getPhrase() const;
+    std::wstring getPhrase() const;
     std::string getSeed() const;
 
-    static bool checkPhraseSeedPair(const std::vector<std::string>& phrase,
+    static bool checkPhraseSeedPair(const std::wstring& phrase,
                                     const std::string& seed,
                                     const BIP39::Dictionary& dictionaryPath);
+   private:
+    binData originalEntropy;
+    std::wstring phrase;
+    std::string seed;
 };
 
 }  // end namespace BIP39
