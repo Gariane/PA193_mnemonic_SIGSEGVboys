@@ -27,6 +27,7 @@ class Mnemonic {
 
     static std::string generateSeed(const std::wstring& mnemonic);
     void addToPhrase(const std::wstring& word);
+    uint8_t calculateChecksum(const std::vector<uint8_t>& entropy); 
 };
 
 }  // end namespace BIP39

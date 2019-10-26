@@ -18,8 +18,7 @@ std::vector<uint8_t> stringToBytes(const std::string& in) {
     std::stringstream hexStringStream; 
     hexStringStream >> std::hex;
 
-    for(size_t strIndex = 0, dataIndex = 0; strIndex < length; ++dataIndex)
-    {
+    for(size_t strIndex = 0, dataIndex = 0; strIndex < length; ++dataIndex) {
         const char tmpStr[3] = { in[strIndex++], in[strIndex++], 0 };
 
         hexStringStream.clear();
@@ -47,25 +46,17 @@ std::string bytesToString(uint8_t* data, size_t dataLength)
 
 } // end of anonymous namespace
 
+
+
+
 namespace BIP39 {    
 
 Mnemonic::Mnemonic(std::string entropy, const BIP39::Dictionary& dict):originalEntropy_(std::move(entropy)) {
     std::vector<uint8_t> entropyChar = stringToBytes(originalEntropy_);
-    int CS = entropyChar.size() / 4;
 
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256_CTX sha256;
-    SHA256_Init(&sha256);
-    SHA256_Update(&sha256, entropyChar.data(), entropyChar.size());
-    SHA256_Final(hash, &sha256);
-
-    uint8_t checksum = (hash[0] & (0xFF << (8 - CS)));
+    uint8_t checksum = calculateChecksum(entropyChar);
     entropyChar.push_back(checksum);
 
-
-    int words = (entropyChar.size() * 8 + CS) / 11;
-
-    int wordCounter = 0;
     uint16_t currIndex = 0;
     int counter = 0;
 
@@ -81,10 +72,6 @@ Mnemonic::Mnemonic(std::string entropy, const BIP39::Dictionary& dict):originalE
               addToPhrase(dict.getWord(currIndex));
               counter = 0;
               currIndex = 0;
-
-              if (++wordCounter == words) {
-                  break;
-              }
           }
        } 
 
@@ -132,6 +119,18 @@ std::string Mnemonic::generateSeed(const std::wstring& mnemonic) {
                        64, out);
 
     return bytesToString(out, 64);
+}
+
+uint8_t Mnemonic::calculateChecksum(const std::vector<uint8_t>& entropy) {
+    int CS = entropy.size() / 4;
+
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256_CTX sha256;
+    SHA256_Init(&sha256);
+    SHA256_Update(&sha256, entropy.data(), entropy.size());
+    SHA256_Final(hash, &sha256);
+
+    return (hash[0] & (0xFF << (8 - CS)));
 }
 
 void Mnemonic::addToPhrase(const std::wstring& word) {
