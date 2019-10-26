@@ -19,7 +19,7 @@ TEST_CASE("OFFICIAL TEST VECTORS") {
             auto mnemonic = Mnemonic(t.entropy, dict);    
 
             CHECK(mnemonic.getEntropy() == t.entropy);
-            //CHECK(mnemonic.getSeed() == t.seed);
+            CHECK(mnemonic.getSeed() == t.seed);
             CHECK(mnemonic.getPhrase() == t.phrase);
         }
 

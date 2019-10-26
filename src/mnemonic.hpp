@@ -2,37 +2,31 @@
 #define MNEMONIC_HPP
 
 #include <string>
-#include <vector>
-#include <array>
 
 #include "dictionary.hpp"
-
-#define DICTIONARY_SIZE 2048
 
 namespace BIP39 {
 
 class Mnemonic {
    public:
-    // TBD - is this data type OK?
-    using binData = std::vector<uint32_t>;
-
-   public:
-    // TBD do we take path to file or filedescriptor directly?
-    Mnemonic(binData entropy, const BIP39::Dictionary& dictionaryPath);
+    Mnemonic(std::string entropy, const BIP39::Dictionary& dict);
     Mnemonic(const std::wstring& phrase,
-             const BIP39::Dictionary& dictionaryPath);
+             const BIP39::Dictionary& dict);
 
-    binData getEntropy() const;
+    std::string getEntropy() const;
     std::wstring getPhrase() const;
     std::string getSeed() const;
 
     static bool checkPhraseSeedPair(const std::wstring& phrase,
                                     const std::string& seed,
-                                    const BIP39::Dictionary& dictionaryPath);
+                                    const BIP39::Dictionary& dict);
    private:
-    binData originalEntropy;
-    std::wstring phrase;
-    std::string seed;
+    std::string originalEntropy_;
+    std::wstring phrase_;
+    std::string seed_;
+
+    static std::string generateSeed(const std::wstring& mnemonic);
+    void addToPhrase(const std::wstring& word);
 };
 
 }  // end namespace BIP39
