@@ -1,8 +1,6 @@
 #include <sstream>
-#include <iostream>
 #include <iomanip>
 #include <codecvt>
-#include <vector>
 #include <cmath>
 
 #include <openssl/sha.h>
@@ -83,40 +81,13 @@ Mnemonic::Mnemonic(std::string entropy, const BIP39::Dictionary& dict):originalE
     seed_ = generateSeed(phrase_);
 }
 
-Mnemonic::Mnemonic(const std::wstring& phrase, const BIP39::Dictionary& dict):phrase_(phrase) {
-    std::wistringstream parser(phrase);
+Mnemonic::Mnemonic(std::wstring phrase, const BIP39::Dictionary& dict):phrase_(std::move(phrase)) {
+    std::vector<uint8_t> entropyChar = getBytesFromPhrase(phrase_, dict);
 
-    std::vector<uint16_t> positions;
+    uint8_t checksum = calculateChecksum({entropyChar.begin(), entropyChar.end() - 1});  
 
-    std::wstring str;
-    while (parser >> str) {
-        positions.push_back(dict.getIndex(str));
-    }
-
-    std::vector<uint8_t> entropyChar;
-    entropyChar.reserve(std::ceil(positions.size() * 11 / 8));
-
-    int counter = 0;
-    uint8_t currentChar = 0;
-    for (uint16_t val : positions) {
-        for (int i = 0; i < 11; ++i) {
-            bool currentBitInVal = (val & (0x8000 >> (5 + i)));
-            if (currentBitInVal) {
-                currentChar |= 0x80 >> counter;
-            }
-            
-            if (++counter == 8) {
-                entropyChar.push_back(currentChar);
-                counter = 0;
-                currentChar = 0;
-            }
-        }
-    }
-    if (counter != 0) {
-        entropyChar.push_back(currentChar);
-    }
-
-    // TODO verify checksum
+    // TODO error check not assert
+    assert(checksum == entropyChar.back());
 
     originalEntropy_ = bytesToString(entropyChar.data(), entropyChar.size() - 1);
     seed_ = generateSeed(phrase_);
@@ -135,8 +106,11 @@ std::string Mnemonic::getSeed() const {
 }
 
 bool Mnemonic::checkPhraseSeedPair(const std::wstring& phrase, const std::string& seed, const BIP39::Dictionary& dict) {
-    // TODO verify checksum of phrase (last few bits appended from hash)
-    // and print warning if doesnt check out
+    std::vector<uint8_t> entropyChar = getBytesFromPhrase(phrase, dict);
+    uint8_t checksum = calculateChecksum({entropyChar.begin(), entropyChar.end() - 1});  
+
+    // TODO error check not assert
+    assert(checksum == entropyChar.back());
     
     return generateSeed(phrase) == seed;
 }
@@ -169,6 +143,37 @@ uint8_t Mnemonic::calculateChecksum(const std::vector<uint8_t>& entropy) {
     SHA256_Final(hash, &sha256);
 
     return (hash[0] & (0xFF << (8 - CS)));
+}
+
+std::vector<uint8_t> Mnemonic::getBytesFromPhrase(const std::wstring& phrase, const Dictionary& dict) {
+    std::vector<uint8_t> entropyChar;
+
+    int counter = 0;
+    uint8_t currentChar = 0;
+
+    std::wistringstream parser(phrase);
+    std::wstring str;
+    while (parser >> str) {
+        // TODO error checking
+        uint16_t val = dict.getIndex(str);
+        for (int i = 0; i < 11; ++i) {
+            bool currentBitInVal = (val & (0x8000 >> (5 + i)));
+            if (currentBitInVal) {
+                currentChar |= 0x80 >> counter;
+            }
+            
+            if (++counter == 8) {
+                entropyChar.push_back(currentChar);
+                counter = 0;
+                currentChar = 0;
+            }
+        }
+    }
+    if (counter != 0) {
+        entropyChar.push_back(currentChar);
+    }
+
+    return entropyChar;
 }
 
 void Mnemonic::addToPhrase(const std::wstring& word) {
