@@ -10,8 +10,7 @@ namespace BIP39 {
 class Mnemonic {
    public:
     Mnemonic(std::string entropy, const BIP39::Dictionary& dict);
-    Mnemonic(const std::wstring& phrase,
-             const BIP39::Dictionary& dict);
+    Mnemonic(const std::wstring& phrase, const BIP39::Dictionary& dict);
 
     std::string getEntropy() const;
     std::wstring getPhrase() const;

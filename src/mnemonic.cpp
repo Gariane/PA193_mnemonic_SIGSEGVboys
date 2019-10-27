@@ -1,6 +1,9 @@
 #include <sstream>
+#include <iostream>
+#include <iomanip>
 #include <codecvt>
 #include <vector>
+#include <cmath>
 
 #include <openssl/sha.h>
 #include <openssl/evp.h>
@@ -80,8 +83,43 @@ Mnemonic::Mnemonic(std::string entropy, const BIP39::Dictionary& dict):originalE
     seed_ = generateSeed(phrase_);
 }
 
-Mnemonic::Mnemonic(const std::wstring& phrase, const BIP39::Dictionary& dict) {
+Mnemonic::Mnemonic(const std::wstring& phrase, const BIP39::Dictionary& dict):phrase_(phrase) {
+    std::wistringstream parser(phrase);
 
+    std::vector<uint16_t> positions;
+
+    std::wstring str;
+    while (parser >> str) {
+        positions.push_back(dict.getIndex(str));
+    }
+
+    std::vector<uint8_t> entropyChar;
+    entropyChar.reserve(std::ceil(positions.size() * 11 / 8));
+
+    int counter = 0;
+    uint8_t currentChar = 0;
+    for (uint16_t val : positions) {
+        for (int i = 0; i < 11; ++i) {
+            bool currentBitInVal = (val & (0x8000 >> (5 + i)));
+            if (currentBitInVal) {
+                currentChar |= 0x80 >> counter;
+            }
+            
+            if (++counter == 8) {
+                entropyChar.push_back(currentChar);
+                counter = 0;
+                currentChar = 0;
+            }
+        }
+    }
+    if (counter != 0) {
+        entropyChar.push_back(currentChar);
+    }
+
+    // TODO verify checksum
+
+    originalEntropy_ = bytesToString(entropyChar.data(), entropyChar.size() - 1);
+    seed_ = generateSeed(phrase_);
 }
 
 std::string Mnemonic::getEntropy() const {
