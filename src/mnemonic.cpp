@@ -1,4 +1,5 @@
 #include <sstream>
+#include <cassert>
 #include <iomanip>
 #include <codecvt>
 #include <cmath>
