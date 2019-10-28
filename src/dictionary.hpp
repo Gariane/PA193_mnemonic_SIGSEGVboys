@@ -26,6 +26,9 @@ class Dictionary {
 
 
     bool checkWhiteSpaces(const std::wstring& checked, const std::locale& loc) {
+        if ( checked.empty() ) {
+            return false;
+        }
         for (wchar_t chr : checked) {
             if (std::isspace(chr, loc)) {
                 return false;
@@ -92,7 +95,7 @@ class Dictionary {
         } else {
             iterator = std::find(keyWords.begin(), keyWords.end(), keyword);
         }
-        if ( iterator == keyWords.end() ) {
+        if ( iterator == keyWords.end() || keyword != *iterator ) {
             throw std::out_of_range("Keyword not present in dictionary");
         }
         return std::distance(keyWords.begin(), iterator);
