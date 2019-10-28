@@ -8,6 +8,17 @@ before_script:
   - mkdir build
   - cd build
 
+addons:
+  apt:
+    sources:
+      - sourceline: "ppa:ubuntu-toolchain-r/test"
+      - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main'
+        key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+    packages:
+        - g++-9
+        - clang-8
+        - openssl
+
 matrix:
   include:
     # gcc compilation
@@ -15,12 +26,6 @@ matrix:
       compiler: gcc
       env:
         - TEST="GCC 9 compilation"
-      addons:
-        apt:
-          sources:
-            - sourceline: "ppa:ubuntu-toolchain-r/test"
-          packages:
-            - g++-9
       script:
         - cmake .. -DCMAKE_C_COMPILER=gcc-9 -DCMAKE_CXX_COMPILER=g++-9
         - make all 
@@ -30,13 +35,6 @@ matrix:
       compiler: clang
       env:
         - TEST="Clang-8 compilation"
-      addons:
-        apt:
-          sources:
-            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main'
-              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
-          packages:
-            - clang-8
       script:
         - cmake .. -DCMAKE_C_COMPILER=clang-8 -DCMAKE_CXX_COMPILER=clang++-8
         - make all
@@ -46,13 +44,6 @@ matrix:
       compiler: clang
       env:
         - TEST="Running testsuite"
-      addons:
-        apt:
-          sources:
-            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main'
-              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
-          packages:
-            - clang-8
       script:
         - cmake .. -DCMAKE_C_COMPILER=clang-8 -DCMAKE_CXX_COMPILER=clang++-8
         - make test 
@@ -89,12 +80,7 @@ matrix:
         - TEST="Valgrind"
       addons:
         apt:
-          sources:
-            - sourceline: "ppa:ubuntu-toolchain-r/test"
-            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main'
-              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
           packages:
-            - clang-8
             - valgrind
       script:
         - cmake .. -DENABLE_VALGRIND=ON -DCMAKE_C_COMPILER=clang-8 -DCMAKE_CXX_COMPILER=clang++-8

@@ -3,32 +3,34 @@
 
 #include <string>
 #include <vector>
-#include <array>
 
 #include "dictionary.hpp"
-
-#define DICTIONARY_SIZE 2048
 
 namespace BIP39 {
 
 class Mnemonic {
    public:
-    // TBD - is this data type OK?
-    using binData = std::vector<uint32_t>;
+    Mnemonic(std::string entropy, const BIP39::Dictionary& dict);
+    Mnemonic(std::wstring phrase, const BIP39::Dictionary& dict);
 
-   public:
-    // TBD do we take path to file or filedescriptor directly?
-    Mnemonic(binData entropy, const BIP39::Dictionary& dictionaryPath);
-    Mnemonic(const std::vector<std::string>& phrase,
-             const BIP39::Dictionary& dictionaryPath);
-
-    binData getEntropy() const;
-    std::string getPhrase() const;
+    std::string getEntropy() const;
+    std::wstring getPhrase() const;
     std::string getSeed() const;
 
-    static bool checkPhraseSeedPair(const std::vector<std::string>& phrase,
+    static bool checkPhraseSeedPair(const std::wstring& phrase,
                                     const std::string& seed,
-                                    const BIP39::Dictionary& dictionaryPath);
+                                    const BIP39::Dictionary& dict);
+   private:
+    std::string originalEntropy_;
+    std::wstring phrase_;
+    std::string seed_;
+
+    /* Maybe move these static to local functions in .cpp file */
+    static std::string generateSeed(const std::wstring& mnemonic);
+    static uint8_t calculateChecksum(const std::vector<uint8_t>& entropy); 
+    static std::vector<uint8_t> getBytesFromPhrase(const std::wstring& phrase, const Dictionary& dict);
+
+    void addToPhrase(const std::wstring& word);
 };
 
 }  // end namespace BIP39
