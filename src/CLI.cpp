@@ -39,10 +39,18 @@ private:
     }
 
     void cleanUp() {
-        memset(password.data(), 0, password.length());
-        memset(phrase.data(), 0, phrase.length());
-        memset(seed.data(), 0, seed.length());
-        memset(entropy.data(), 0, entropy.length());
+        for(char & i : password) {
+            i = '\0';
+        }
+        for(char & i : phrase) {
+            i = '\0';
+        }
+        for(char & i : seed) {
+            i = '\0';
+        }
+        for(char & i : entropy) {
+            i = '\0';
+        }
     }
 
     void funcGenerate() {
