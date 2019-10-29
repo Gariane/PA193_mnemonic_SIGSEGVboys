@@ -15,23 +15,23 @@ void runTests(const std::vector<testData>& data, const Dictionary& dict) {
         const testData& t = officialTestVectors[i];
 
         DYNAMIC_SECTION("Generation from entropy " << i) {
-            auto mnemonic = Mnemonic(t.entropy, dict);    
+            auto mnemonic = Mnemonic(t.entropy, t.passphrase, dict);    
 
             CHECK(mnemonic.getEntropy() == t.entropy);
-            //CHECK(mnemonic.getSeed() == t.seed);
+            CHECK(mnemonic.getSeed() == t.seed);
             CHECK(mnemonic.getPhrase() == t.phrase);
         }
 
         DYNAMIC_SECTION("Generation from phrase " << i) {
-            auto mnemonic = Mnemonic(t.phrase, dict); 
+            auto mnemonic = Mnemonic(t.phrase, t.passphrase, dict); 
 
             CHECK(mnemonic.getEntropy() == t.entropy);
-            //CHECK(mnemonic.getSeed() == t.seed);
+            CHECK(mnemonic.getSeed() == t.seed);
             CHECK(mnemonic.getPhrase() == t.phrase);
         }
 
         DYNAMIC_SECTION("Phrase-Seed pair " << i) {
-            //CHECK(Mnemonic::checkPhraseSeedPair(t.phrase, t.seed, dict));
+            CHECK(Mnemonic::checkPhraseSeedPair(t.phrase, t.seed, t.passphrase, dict));
         }
 
    } 

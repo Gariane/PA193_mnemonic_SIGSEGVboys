@@ -53,7 +53,7 @@ std::string bytesToString(uint8_t* data, size_t dataLength)
 
 namespace BIP39 {    
 
-Mnemonic::Mnemonic(std::string entropy, const BIP39::Dictionary& dict):originalEntropy_(std::move(entropy)) {
+Mnemonic::Mnemonic(std::string entropy, const std::wstring& passphrase, const BIP39::Dictionary& dict):originalEntropy_(std::move(entropy)) {
     std::vector<uint8_t> entropyChar = stringToBytes(originalEntropy_);
 
     uint8_t checksum = calculateChecksum(entropyChar);
@@ -79,10 +79,10 @@ Mnemonic::Mnemonic(std::string entropy, const BIP39::Dictionary& dict):originalE
 
     }
 
-    seed_ = generateSeed(phrase_);
+    seed_ = generateSeed(phrase_, passphrase);
 }
 
-Mnemonic::Mnemonic(std::wstring phrase, const BIP39::Dictionary& dict):phrase_(std::move(phrase)) {
+Mnemonic::Mnemonic(std::wstring phrase, const std::wstring& passphrase, const BIP39::Dictionary& dict):phrase_(std::move(phrase)) {
     std::vector<uint8_t> entropyChar = getBytesFromPhrase(phrase_, dict);
 
     uint8_t checksum = calculateChecksum({entropyChar.begin(), entropyChar.end() - 1});  
@@ -91,7 +91,7 @@ Mnemonic::Mnemonic(std::wstring phrase, const BIP39::Dictionary& dict):phrase_(s
     assert(checksum == entropyChar.back());
 
     originalEntropy_ = bytesToString(entropyChar.data(), entropyChar.size() - 1);
-    seed_ = generateSeed(phrase_);
+    seed_ = generateSeed(phrase_, passphrase);
 }
 
 std::string Mnemonic::getEntropy() const {
@@ -106,21 +106,21 @@ std::string Mnemonic::getSeed() const {
     return seed_;
 }
 
-bool Mnemonic::checkPhraseSeedPair(const std::wstring& phrase, const std::string& seed, const BIP39::Dictionary& dict) {
+bool Mnemonic::checkPhraseSeedPair(const std::wstring& phrase, const std::string& seed, const std::wstring& passphrase, const BIP39::Dictionary& dict) {
     std::vector<uint8_t> entropyChar = getBytesFromPhrase(phrase, dict);
     uint8_t checksum = calculateChecksum({entropyChar.begin(), entropyChar.end() - 1});  
 
     // TODO error check not assert
     assert(checksum == entropyChar.back());
     
-    return generateSeed(phrase) == seed;
+    return generateSeed(phrase, passphrase) == seed;
 }
 
 
 // THIS method doesn't work properly yet
-std::string Mnemonic::generateSeed(const std::wstring& mnemonic) {
+std::string Mnemonic::generateSeed(const std::wstring& mnemonic, const std::wstring& passphrase = L"") {
     unsigned char out[64];
-    std::wstring salt = L"mnemonic" + mnemonic;
+    std::wstring salt = L"mnemonic" + passphrase;
 
     std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
     std::string utf8_phrase = myconv.to_bytes(mnemonic);
