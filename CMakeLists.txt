@@ -28,7 +28,7 @@ if (ENABLE_COVERAGE)
 endif()
 
 set(testBin "testsuite")
-set(testSources "tests/test-main.cpp" "tests/test-utils.cpp" "tests/test-mnemonic.cpp")
+set(testSources "tests/test-main.cpp" "tests/test-utils.cpp" "tests/test-mnemonic.cpp" "tests/test-mnemonic-invalid.cpp")
 
 set(libName "bip39")
 set(libSources "src/mnemonic.cpp" "src/dictionary.cpp")
