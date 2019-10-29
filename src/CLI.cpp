@@ -8,6 +8,7 @@ using BIP39::Mnemonic;
 #include <getopt.h>
 #include <iostream>
 #include <sstream>
+#include <cstring>
 
 class Parser {
 private:
@@ -37,6 +38,13 @@ private:
         }
     }
 
+    void cleanUp() {
+        memset(password.data(), 0, password.length());
+        memset(phrase.data(), 0, phrase.length());
+        memset(seed.data(), 0, seed.length());
+        memset(entropy.data(), 0, entropy.length());
+    }
+
     void funcGenerate() {
         std::ifstream input(entropy);
         if (input.fail()) {
@@ -51,6 +59,7 @@ private:
         std::cout << "---------------------------------------------------------------------" << std::endl;
         std::cout << "Generated phrase: " << mnem.getPhrase() << std::endl;
         std::cout << "Generated seed: " << mnem.getSeed() << std::endl;
+        cleanUp();
     }
 
     void funcReverse() {
@@ -67,6 +76,7 @@ private:
         std::cout << "---------------------------------------------------------------------" << std::endl;
         std::cout << "Generated entropy: " << mnem.getEntropy() << std::endl;
         std::cout << "Generated seed: " << mnem.getSeed() << std::endl;
+        cleanUp();
     }
 
     void funcCheck() {
@@ -89,6 +99,7 @@ private:
         } else {
             std::cout << "NOK - provided phrase did NOT generated expected seed" << std::endl;
         }
+        cleanUp();
     }
 
 public:
