@@ -1,7 +1,5 @@
 #include <sstream>
-#include <cassert>
 #include <iomanip>
-#include <codecvt>
 #include <cmath>
 
 #include <openssl/sha.h>
@@ -20,7 +18,7 @@ std::vector<uint8_t> stringToBytes(const std::string& in) {
     std::stringstream hexStringStream; 
     hexStringStream >> std::hex;
 
-    for(size_t strIndex = 0, dataIndex = 0; strIndex < length; ++dataIndex) {
+    for (size_t strIndex = 0, dataIndex = 0; strIndex < length; ++dataIndex) {
         const char tmpStr[3] = { in[strIndex++], in[strIndex++], 0 };
 
         hexStringStream.clear();
@@ -34,16 +32,22 @@ std::vector<uint8_t> stringToBytes(const std::string& in) {
     return out;
 }
 
-std::string bytesToString(uint8_t* data, size_t dataLength)
+
+std::string bytesToString(const uint8_t* data, size_t dataLength)
 {
     std::stringstream hexStringStream;
     
     hexStringStream << std::hex << std::setfill('0');
-    for(size_t index = 0; index < dataLength; ++index) {
+    for (size_t index = 0; index < dataLength; ++index) {
         hexStringStream << std::setw(2) << static_cast<int>(data[index]);
     }
 
     return hexStringStream.str();
+}
+
+std::string bytesToString(const std::vector<uint8_t>& data)
+{
+    return bytesToString(data.data(), data.size());
 }
 
 } // end of anonymous namespace
@@ -53,7 +57,14 @@ std::string bytesToString(uint8_t* data, size_t dataLength)
 
 namespace BIP39 {    
 
-Mnemonic::Mnemonic(std::string entropy, const std::string& passphrase, const BIP39::Dictionary& dict, BIP39::Mnemonic::fromEntropy) :originalEntropy_(std::move(entropy)) {
+Mnemonic::Mnemonic(std::string entropy, const std::string& passphrase, const BIP39::Dictionary& dict, BIP39::Mnemonic::fromEntropy /* unused */) :originalEntropy_(std::move(entropy)) {
+    if (originalEntropy_.length() < 32 || originalEntropy_.length() > 64 || originalEntropy_.length() % 8 != 0) {
+        throw std::invalid_argument("Entropy size is invalid");
+    }
+    if (originalEntropy_.find_first_not_of("1234567890abcdefABCDEF") != std::string::npos) {
+        throw std::invalid_argument("Entropy is not hexadecimal string");
+    }
+
     std::vector<uint8_t> entropyChar = stringToBytes(originalEntropy_);
 
     uint8_t checksum = calculateChecksum(entropyChar);
@@ -70,7 +81,6 @@ Mnemonic::Mnemonic(std::string entropy, const std::string& passphrase, const BIP
           } 
 
           if (++counter == 11) {
-              // TODO bounds checking of index
               addToPhrase(dict.getWord(currIndex));
               counter = 0;
               currIndex = 0;
@@ -82,15 +92,17 @@ Mnemonic::Mnemonic(std::string entropy, const std::string& passphrase, const BIP
     seed_ = generateSeed(phrase_, passphrase);
 }
 
-Mnemonic::Mnemonic(std::string phrase, const std::string& passphrase, const BIP39::Dictionary& dict, BIP39::Mnemonic::fromPhrase):phrase_(std::move(phrase)) {
+Mnemonic::Mnemonic(std::string phrase, const std::string& passphrase, const BIP39::Dictionary& dict, BIP39::Mnemonic::fromPhrase /* unused */):phrase_(std::move(phrase)) {
     std::vector<uint8_t> entropyChar = getBytesFromPhrase(phrase_, dict);
+    std::vector<uint8_t> entropyWithoutChecksum = {entropyChar.begin(), entropyChar.end() - 1};
+    
+    uint8_t checksum = calculateChecksum(entropyWithoutChecksum);  
 
-    uint8_t checksum = calculateChecksum({entropyChar.begin(), entropyChar.end() - 1});  
+    if (checksum != entropyChar.back()) {
+        throw std::invalid_argument("Phrase checksum is not valid with supplied dictionary");
+    }
 
-    // TODO error check not assert
-    assert(checksum == entropyChar.back());
-
-    originalEntropy_ = bytesToString(entropyChar.data(), entropyChar.size() - 1);
+    originalEntropy_ = bytesToString(entropyWithoutChecksum);
     seed_ = generateSeed(phrase_, passphrase);
 }
 
@@ -110,23 +122,26 @@ bool Mnemonic::checkPhraseSeedPair(const std::string& phrase, const std::string&
     std::vector<uint8_t> entropyChar = getBytesFromPhrase(phrase, dict);
     uint8_t checksum = calculateChecksum({entropyChar.begin(), entropyChar.end() - 1});  
 
-    // TODO error check not assert
-    assert(checksum == entropyChar.back());
+    if (checksum != entropyChar.back()) {
+        throw std::invalid_argument("Phrase checksum is not valid with supplied dictionary");
+    }
     
     return generateSeed(phrase, passphrase) == seed;
 }
 
-
-// THIS method doesn't work properly yet
 std::string Mnemonic::generateSeed(const std::string& mnemonic, const std::string& passphrase = "") {
     unsigned char out[64];
     std::string salt = "mnemonic" + passphrase;
 
 
-    PKCS5_PBKDF2_HMAC(mnemonic.c_str(), mnemonic.length(),
+    int ret = PKCS5_PBKDF2_HMAC(mnemonic.c_str(), mnemonic.length(),
                        reinterpret_cast<const unsigned char*>(salt.c_str()), salt.length(),
                        2048, EVP_sha512(),
                        64, out);
+
+    if (ret != 1) {
+        throw std::runtime_error("Seed generation failed");
+    }
 
     return bytesToString(out, 64);
 }
@@ -134,11 +149,24 @@ std::string Mnemonic::generateSeed(const std::string& mnemonic, const std::strin
 uint8_t Mnemonic::calculateChecksum(const std::vector<uint8_t>& entropy) {
     int CS = entropy.size() / 4;
 
+    int ret = 0;
+
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256_CTX sha256;
-    SHA256_Init(&sha256);
-    SHA256_Update(&sha256, entropy.data(), entropy.size());
-    SHA256_Final(hash, &sha256);
+    ret = SHA256_Init(&sha256);
+    if (ret != 1) {
+        throw std::runtime_error("Checksum calculation failed");
+    }
+    
+    ret = SHA256_Update(&sha256, entropy.data(), entropy.size());
+    if (ret != 1) {
+        throw std::runtime_error("Checksum calculation failed");
+    }
+
+    ret = SHA256_Final(hash, &sha256);
+    if (ret != 1) {
+        throw std::runtime_error("Checksum calculation failed");
+    }
 
     return (hash[0] & (0xFF << (8 - CS)));
 }
@@ -152,7 +180,6 @@ std::vector<uint8_t> Mnemonic::getBytesFromPhrase(const std::string& phrase, con
     std::istringstream parser(phrase);
     std::string str;
     while (parser >> str) {
-        // TODO error checking
         uint16_t val = dict.getIndex(str);
         for (int i = 0; i < 11; ++i) {
             bool currentBitInVal = (val & (0x8000 >> (5 + i)));
