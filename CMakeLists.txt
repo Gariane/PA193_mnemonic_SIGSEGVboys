@@ -36,6 +36,9 @@ set(libSources "src/mnemonic.cpp" "src/dictionary.cpp")
 set(cliBin "cli")
 set(cliSources "src/CLI.cpp")
 
+set(cliBin "cli")
+set(cliSources "src/CLI.cpp")
+
 find_package(OpenSSL REQUIRED)
 include_directories(src tests)
 add_library(${libName} ${libSources})
