@@ -33,19 +33,26 @@ set(testSources "tests/test-main.cpp" "tests/test-utils.cpp" "tests/test-mnemoni
 set(libName "bip39")
 set(libSources "src/mnemonic.cpp" "src/dictionary.cpp")
 
+set(cliBin "cli")
+set(cliSources "src/CLI.cpp")
+
 find_package(OpenSSL REQUIRED)
 include_directories(src tests)
 add_library(${libName} ${libSources})
 target_link_libraries(${libName} OpenSSL::SSL)
 
-
 add_executable(${testBin} ${testSources})
-target_link_libraries(${testBin} bip39)
+target_link_libraries(${testBin} ${libName})
+
+add_executable(${cliBin} ${cliSources})
+target_link_libraries(${cliBin} ${libName})
 
 add_custom_target(
-    test
+    runtest
     COMMAND "./${testBin}"
     COMMENT "Running testsuite"
     DEPENDS "./${testBin}" 
   )
+
+
 
