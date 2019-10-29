@@ -37,20 +37,20 @@ matrix:
 
     # run tests
     - os: linux
-      compiler: clang
+      compiler: gcc 
       env:
         - TEST="Running testsuite"
       addons:
         apt:
           packages:
-              - clang
+              - g++
               - openssl
               - lcov
       script:
         - cmake .. -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DENABLE_COVERAGE=ON
         - make test 
         - lcov --directory . --capture --output-file coverage.info
-        - lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' --output-file coverage.info
+        - lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' "**/tests/*" --output-file coverage.info
         - lcov --list coverage.info
         - bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports" 
 
@@ -82,16 +82,17 @@ matrix:
 
     # valgrind
     - os: linux
+      compiler: gcc
       env:
         - TEST="Valgrind"
       addons:
         apt:
           packages:
-              - clang
+              - g++ 
               - openssl
               - valgrind
       script:
-        - cmake .. -DENABLE_VALGRIND=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+        - cmake .. -DENABLE_VALGRIND=ON -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
         - make all
         - valgrind --version
         - valgrind --leak-check=full --show-reachable=yes --track-origins=yes --error-exitcode=1 ./testsuite
