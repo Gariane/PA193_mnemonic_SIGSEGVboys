@@ -23,7 +23,7 @@ void runTests(const std::vector<testData>& data, const Dictionary& dict) {
         }
 
         DYNAMIC_SECTION("Generation from phrase " << i) {
-            auto mnemonic = Mnemonic(t.phrase, t.passphrase, dict); 
+            auto mnemonic = Mnemonic(t.phrase, t.passphrase, dict, Mnemonic::fromPhrase::Phrase); 
 
             CHECK(mnemonic.getEntropy() == t.entropy);
             CHECK(mnemonic.getSeed() == t.seed);

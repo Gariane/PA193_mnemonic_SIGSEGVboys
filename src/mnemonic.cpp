@@ -53,7 +53,7 @@ std::string bytesToString(uint8_t* data, size_t dataLength)
 
 namespace BIP39 {    
 
-Mnemonic::Mnemonic(std::string entropy, const std::wstring& passphrase, const BIP39::Dictionary& dict):originalEntropy_(std::move(entropy)) {
+Mnemonic::Mnemonic(std::string entropy, const std::string& passphrase, const BIP39::Dictionary& dict, BIP39::Mnemonic::fromEntropy) :originalEntropy_(std::move(entropy)) {
     std::vector<uint8_t> entropyChar = stringToBytes(originalEntropy_);
 
     uint8_t checksum = calculateChecksum(entropyChar);
@@ -82,7 +82,7 @@ Mnemonic::Mnemonic(std::string entropy, const std::wstring& passphrase, const BI
     seed_ = generateSeed(phrase_, passphrase);
 }
 
-Mnemonic::Mnemonic(std::wstring phrase, const std::wstring& passphrase, const BIP39::Dictionary& dict):phrase_(std::move(phrase)) {
+Mnemonic::Mnemonic(std::string phrase, const std::string& passphrase, const BIP39::Dictionary& dict, BIP39::Mnemonic::fromPhrase):phrase_(std::move(phrase)) {
     std::vector<uint8_t> entropyChar = getBytesFromPhrase(phrase_, dict);
 
     uint8_t checksum = calculateChecksum({entropyChar.begin(), entropyChar.end() - 1});  
@@ -98,7 +98,7 @@ std::string Mnemonic::getEntropy() const {
     return originalEntropy_;
 }
 
-std::wstring Mnemonic::getPhrase() const {
+std::string Mnemonic::getPhrase() const {
     return phrase_;
 }
 
@@ -106,7 +106,7 @@ std::string Mnemonic::getSeed() const {
     return seed_;
 }
 
-bool Mnemonic::checkPhraseSeedPair(const std::wstring& phrase, const std::string& seed, const std::wstring& passphrase, const BIP39::Dictionary& dict) {
+bool Mnemonic::checkPhraseSeedPair(const std::string& phrase, const std::string& seed, const std::string& passphrase, const BIP39::Dictionary& dict) {
     std::vector<uint8_t> entropyChar = getBytesFromPhrase(phrase, dict);
     uint8_t checksum = calculateChecksum({entropyChar.begin(), entropyChar.end() - 1});  
 
@@ -118,17 +118,14 @@ bool Mnemonic::checkPhraseSeedPair(const std::wstring& phrase, const std::string
 
 
 // THIS method doesn't work properly yet
-std::string Mnemonic::generateSeed(const std::wstring& mnemonic, const std::wstring& passphrase = L"") {
+std::string Mnemonic::generateSeed(const std::string& mnemonic, const std::string& passphrase = "") {
     unsigned char out[64];
-    std::wstring salt = L"mnemonic" + passphrase;
+    std::string salt = "mnemonic" + passphrase;
 
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
-    std::string utf8_phrase = myconv.to_bytes(mnemonic);
-    std::string utf8_salt = myconv.to_bytes(salt);
 
-    PKCS5_PBKDF2_HMAC(utf8_phrase.c_str(), utf8_phrase.length(),
-                       reinterpret_cast<const unsigned char*>(utf8_salt.c_str()),utf8_salt.length(), 2048,
-                       EVP_sha512(),
+    PKCS5_PBKDF2_HMAC(mnemonic.c_str(), mnemonic.length(),
+                       reinterpret_cast<const unsigned char*>(salt.c_str()), salt.length(),
+                       2048, EVP_sha512(),
                        64, out);
 
     return bytesToString(out, 64);
@@ -146,14 +143,14 @@ uint8_t Mnemonic::calculateChecksum(const std::vector<uint8_t>& entropy) {
     return (hash[0] & (0xFF << (8 - CS)));
 }
 
-std::vector<uint8_t> Mnemonic::getBytesFromPhrase(const std::wstring& phrase, const Dictionary& dict) {
+std::vector<uint8_t> Mnemonic::getBytesFromPhrase(const std::string& phrase, const Dictionary& dict) {
     std::vector<uint8_t> entropyChar;
 
     int counter = 0;
     uint8_t currentChar = 0;
 
-    std::wistringstream parser(phrase);
-    std::wstring str;
+    std::istringstream parser(phrase);
+    std::string str;
     while (parser >> str) {
         // TODO error checking
         uint16_t val = dict.getIndex(str);
@@ -177,9 +174,9 @@ std::vector<uint8_t> Mnemonic::getBytesFromPhrase(const std::wstring& phrase, co
     return entropyChar;
 }
 
-void Mnemonic::addToPhrase(const std::wstring& word) {
+void Mnemonic::addToPhrase(const std::string& word) {
     if (!phrase_.empty()) {
-        phrase_ += L" ";
+        phrase_ += " ";
     }
 
     phrase_ += word;

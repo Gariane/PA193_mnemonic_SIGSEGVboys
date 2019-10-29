@@ -6,11 +6,11 @@
 
 void indexAndBack(BIP39::Dictionary& dict) {
     for (int i = 0; i < 2048; i++) {
-        std::wstring current;
+        std::string current;
         CHECK_NOTHROW(current = dict.getWord(i));
         REQUIRE(dict.getIndex(current) == i);
     }
-    REQUIRE_THROWS_AS(dict.getIndex(L"totallyNonExistentButValidWordNotPresentInTheDictionary"), std::out_of_range);
+    REQUIRE_THROWS_AS(dict.getIndex("totallyNonExistentButValidWordNotPresentInTheDictionary"), std::out_of_range);
     REQUIRE_THROWS_AS(dict.getWord(-1), std::out_of_range);
     REQUIRE_THROWS_AS(dict.getWord(2049), std::out_of_range);
 }
