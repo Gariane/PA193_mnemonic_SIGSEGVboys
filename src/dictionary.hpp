@@ -26,7 +26,7 @@ class Dictionary {
 
 
     bool checkWhiteSpaces(const std::string& checked) {
-        if ( checked.empty() ) {
+        if (checked.empty()) {
             return false;
         }
         for (wchar_t chr : checked) {
@@ -49,11 +49,11 @@ class Dictionary {
                 throw std::length_error(
                     "Dictionary too long (2048 keywords expected)");
             }
-            if ( !checkWhiteSpaces(current) ) {
+            if (!checkWhiteSpaces(current)) {
                 throw std::invalid_argument("Invalid character on line " +
                                                 std::to_string(count + 1));
             }
-            if ( !check_uniqueness(count , current) ) {
+            if (!check_uniqueness(count , current)) {
                 throw std::invalid_argument("Duplicate word on line " + std::to_string(count + 1));
             }
             keyWords[count] = current;
@@ -63,13 +63,11 @@ class Dictionary {
             throw std::length_error(
                 "Dictionary too short (2048 keywords expected)");
         }
-        if ( !(sorted = std::is_sorted(keyWords.begin(), keyWords.end())) ) {
-            sorted = false;
-        }
+        sorted = std::is_sorted(keyWords.begin(), keyWords.end());
     }
 
    public:
-    explicit Dictionary(const std::string& path) : keyWords(), sorted(true) {
+    explicit Dictionary(const std::string& path) : sorted(true) {
         std::ifstream input(path);
         if (input.fail()) {
             throw std::invalid_argument("Invalid path: " + path);
@@ -77,7 +75,7 @@ class Dictionary {
         parseFile(input);
     }
 
-    explicit Dictionary(std::ifstream& input) : keyWords(), sorted(true) {
+    explicit Dictionary(std::ifstream& input) : sorted(true) {
         parseFile(input);
     }
 
@@ -87,13 +85,13 @@ class Dictionary {
     }
 
     unsigned getIndex(const std::string& keyword) const {
-        auto iterator = keyWords.begin();
-        if ( sorted ) {
+        auto iterator = keyWords.begin();   // NOLINT just here to be able to use 'auto'
+        if (sorted) {
             iterator = std::lower_bound(keyWords.begin(), keyWords.end(), keyword);
         } else {
             iterator = std::find(keyWords.begin(), keyWords.end(), keyword);
         }
-        if ( iterator == keyWords.end() || keyword != *iterator ) {
+        if (iterator == keyWords.end() || keyword != *iterator) {
             throw std::out_of_range("Keyword not present in dictionary");
         }
         return std::distance(keyWords.begin(), iterator);
