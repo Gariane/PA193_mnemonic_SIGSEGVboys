@@ -10,13 +10,9 @@ before_script:
 
 addons:
   apt:
-    sources:
-      - sourceline: "ppa:ubuntu-toolchain-r/test"
-      - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main'
-        key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
     packages:
-        - g++-9
-        - clang-8
+        - g++
+        - clang
         - openssl
 
 matrix:
@@ -25,28 +21,38 @@ matrix:
     - os: linux
       compiler: gcc
       env:
-        - TEST="GCC 9 compilation"
+        - TEST="GCC 7 compilation"
       script:
-        - cmake .. -DCMAKE_C_COMPILER=gcc-9 -DCMAKE_CXX_COMPILER=g++-9
+        - cmake .. -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
         - make all 
 
     # clang compilation
     - os: linux
       compiler: clang
       env:
-        - TEST="Clang-8 compilation"
+        - TEST="Clang-7 compilation"
       script:
-        - cmake .. -DCMAKE_C_COMPILER=clang-8 -DCMAKE_CXX_COMPILER=clang++-8
+        - cmake .. -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
         - make all
 
     # run tests
     - os: linux
-      compiler: clang
+      compiler: gcc 
       env:
         - TEST="Running testsuite"
+      addons:
+        apt:
+          packages:
+              - g++
+              - openssl
+              - lcov
       script:
-        - cmake .. -DCMAKE_C_COMPILER=clang-8 -DCMAKE_CXX_COMPILER=clang++-8
+        - cmake .. -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DENABLE_COVERAGE=ON
         - make test 
+        - lcov --directory . --capture --output-file coverage.info
+        - lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' "**/tests/*" --output-file coverage.info
+        - lcov --list coverage.info
+        - bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports" 
 
     # clang tidy analysis
     - os: linux
@@ -76,14 +82,17 @@ matrix:
 
     # valgrind
     - os: linux
+      compiler: gcc
       env:
         - TEST="Valgrind"
       addons:
         apt:
           packages:
-            - valgrind
+              - g++ 
+              - openssl
+              - valgrind
       script:
-        - cmake .. -DENABLE_VALGRIND=ON -DCMAKE_C_COMPILER=clang-8 -DCMAKE_CXX_COMPILER=clang++-8
+        - cmake .. -DENABLE_VALGRIND=ON -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
         - make all
         - valgrind --version
         - valgrind --leak-check=full --show-reachable=yes --track-origins=yes --error-exitcode=1 ./testsuite

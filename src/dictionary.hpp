@@ -5,6 +5,7 @@
 #include <array>
 #include <fstream>
 #include <locale>
+#include <codecvt>
 #include <string>
 
 #define DICTIONARY_SIZE 2048
@@ -25,6 +26,9 @@ class Dictionary {
 
 
     bool checkWhiteSpaces(const std::wstring& checked, const std::locale& loc) {
+        if ( checked.empty() ) {
+            return false;
+        }
         for (wchar_t chr : checked) {
             if (std::isspace(chr, loc)) {
                 return false;
@@ -33,13 +37,9 @@ class Dictionary {
         return true;
     }
 
-    void parseFile(const std::string& path) {
-        std::wifstream input(path);
-        std::locale loc("");
+    void parseFile(std::wifstream& input) {
+        std::locale loc(input.getloc(), new std::codecvt_utf8<wchar_t>);
         input.imbue(loc);
-        if (input.fail()) {
-            throw std::invalid_argument("Invalid path: " + path);
-        }
         std::wstring current;
         int count = 0;
         while (!input.eof()) {
@@ -71,7 +71,17 @@ class Dictionary {
     }
 
    public:
-    explicit Dictionary(const std::string& path) : keyWords(), sorted(true) { parseFile(path); }
+    explicit Dictionary(const std::string& path) : keyWords(), sorted(true) {
+        std::wifstream input(path);
+        if (input.fail()) {
+            throw std::invalid_argument("Invalid path: " + path);
+        }
+        parseFile(input);
+    }
+
+    explicit Dictionary(std::wifstream& input) : keyWords(), sorted(true) {
+        parseFile(input);
+    }
 
     // maybe throws an exception when index is out of range, whoknows
     const std::wstring& getWord(unsigned index) const {
@@ -85,7 +95,7 @@ class Dictionary {
         } else {
             iterator = std::find(keyWords.begin(), keyWords.end(), keyword);
         }
-        if ( iterator == keyWords.end() ) {
+        if ( iterator == keyWords.end() || keyword != *iterator ) {
             throw std::out_of_range("Keyword not present in dictionary");
         }
         return std::distance(keyWords.begin(), iterator);

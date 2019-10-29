@@ -5,7 +5,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES Clang OR ${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
     # using regular Clang or AppleClang or GCC
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -pedantic -Wold-style-cast -Weffc++ -g")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -pedantic -Wold-style-cast -Weffc++")
     set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
     # using Visual Studio C++
@@ -23,6 +23,10 @@ if (ENABLE_VALGRIND)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
 endif()
 
+if (ENABLE_COVERAGE) 
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 --coverage")
+endif()
+
 set(testBin "testsuite")
 set(testSources "tests/test-main.cpp" "tests/test-utils.cpp" "tests/test-mnemonic.cpp")
 
@@ -33,7 +37,6 @@ find_package(OpenSSL REQUIRED)
 include_directories(src tests)
 add_library(${libName} ${libSources})
 target_link_libraries(${libName} OpenSSL::SSL)
-
 
 
 add_executable(${testBin} ${testSources})
