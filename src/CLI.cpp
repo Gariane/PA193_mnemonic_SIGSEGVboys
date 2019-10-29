@@ -101,8 +101,8 @@ private:
         buffer2 << input2.rdbuf();
         checkDict();
         Dictionary dict(dictionary);
-        Mnemonic mnem(buffer.str(), password, dict, Mnemonic::fromPhrase::Phrase);
-        if(mnem.getSeed() == buffer2.str()) {
+        bool ok = Mnemonic::checkPhraseSeedPair(buffer.str(), buffer2.str(), password, dict);
+        if(ok) {
             std::cout << "OK - provided phrase generated expected seed" << std::endl;
         } else {
             std::cout << "NOK - provided phrase did NOT generated expected seed" << std::endl;
