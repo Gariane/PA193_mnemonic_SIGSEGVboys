@@ -15,6 +15,7 @@ class Parser {
     bool check = false;
     bool generate = false;
     bool reverse = false;
+    bool taskSpecified = false;
     std::string dictionary;
     std::string entropy;
     std::string phrase;
@@ -30,7 +31,7 @@ class Parser {
 
     void checkDictPath() {
         if (dictionary.empty()) {
-            std::cerr << "No dictionary specified";
+            std::cerr << "No dictionary specified" << std::endl;
             std::exit(1);
         }
     }
@@ -169,44 +170,50 @@ class Parser {
                     password = optarg;
                     break;
                 case 'c':
-                    if (generate || reverse) {
-                        std::cerr << "A function has already been specified";
+                    if (taskSpecified) {
+                        std::cerr << "A function has already been specified" << std::endl;
                         std::exit(1);
                     }
                     check = true;
+                    taskSpecified = true;
                     if (optind < argc && argv[optind][0] != '-') {
                         phrase = optarg;
                         seed = argv[optind];
                         optind++;
                     } else {
-                        std::cerr << "Wrong parameter specified, use -h or "
-                                     "--help for usage info";
+                        std::cerr << "Wrong parameter specified" << std::endl;
                         printHelp();
                         std::exit(1);
                     }
                     break;
                 case 'g':
-                    if (check || reverse) {
-                        std::cerr << "A function has already been specified";
+                    if (taskSpecified) {
+                        std::cerr << "A function has already been specified" << std::endl;
                         std::exit(1);
                     }
                     generate = true;
+                    taskSpecified = true;
                     entropy = optarg;
                     break;
                 case 'r':
-                    if (check || generate) {
-                        std::cerr << "A function has already been specified";
+                    if (taskSpecified) {
+                        std::cerr << "A function has already been specified" << std::endl;
                         std::exit(1);
                     }
                     reverse = true;
+                    taskSpecified = true;
                     phrase = optarg;
                     break;
                 default:
-                    std::cerr << "Wrong parameter specified, use -h or --help "
-                                 "for usage info";
+                    std::cerr << "Wrong parameter specified" << std::endl;
                     printHelp();
                     std::exit(1);
             }
+        }
+        if(!taskSpecified) {
+            std::cerr << "No task specified to perform, use one of -c -g -r flags" << std::endl;
+            printHelp();
+            std::exit(1);
         }
         if (generate) funcGenerate();
         if (reverse) funcReverse();
