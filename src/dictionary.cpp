@@ -1,9 +1,9 @@
-#include <array>
+#include "dictionary.hpp"
+
 #include <algorithm>
+#include <array>
 #include <fstream>
 #include <string>
-
-#include "dictionary.hpp"
 
 #define DICTIONARY_SIZE 2048
 
@@ -42,10 +42,11 @@ void Dictionary::parseFile(std::ifstream& input) {
         }
         if (!checkWhiteSpaces(current)) {
             throw std::invalid_argument("Invalid character on line " +
-                                            std::to_string(count + 1));
+                                        std::to_string(count + 1));
         }
-        if (!checkUniqueness(count , current)) {
-            throw std::invalid_argument("Duplicate word on line " + std::to_string(count + 1));
+        if (!checkUniqueness(count, current)) {
+            throw std::invalid_argument("Duplicate word on line " +
+                                        std::to_string(count + 1));
         }
         keyWords[count] = current;
         count++;
@@ -59,7 +60,7 @@ void Dictionary::parseFile(std::ifstream& input) {
 
 Dictionary::Dictionary(const std::string& path) : sorted(true) {
     std::ifstream input(path);
-    if (input.fail()) {
+    if (input.fail() || !input.is_open()) {
         throw std::invalid_argument("Invalid path: " + path);
     }
     parseFile(input);
@@ -75,7 +76,8 @@ std::string Dictionary::getWord(unsigned index) const {
 }
 
 unsigned Dictionary::getIndex(const std::string& keyword) const {
-    auto iterator = keyWords.begin();   // NOLINT just here to be able to use 'auto'
+    auto iterator =
+        keyWords.begin();  // NOLINT just here to be able to use 'auto'
     if (sorted) {
         iterator = std::lower_bound(keyWords.begin(), keyWords.end(), keyword);
     } else {
@@ -87,4 +89,4 @@ unsigned Dictionary::getIndex(const std::string& keyword) const {
     return std::distance(keyWords.begin(), iterator);
 }
 
-} // end of namespace BIP39
+}  // end of namespace BIP39
