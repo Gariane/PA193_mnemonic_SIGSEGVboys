@@ -19,17 +19,15 @@ bool Dictionary::checkUniqueness(int size, const std::string &item) const {
 
 bool Dictionary::checkWhiteSpaces(const std::string &checked) const {
     if (checked.empty()) {
-        std::cerr << "Empty line" << std::endl;
         return false;
     }
-    int charno = 1;
+
     for (char chr : checked) {
         if (std::isspace(chr)) {
-            std::cerr << "Whitespace on position " << charno << std::endl;
             return false;
         }
-        charno++;
     }
+
     return true;
 }
 
@@ -47,6 +45,9 @@ void Dictionary::parseFile(std::ifstream &input) {
         if (count >= DICTIONARY_SIZE) {
             throw std::length_error(
                 "Dictionary too long (2048 keywords expected)");
+        }
+        if (!current.empty() && current.back() == '\r') {
+            current.pop_back();
         }
         if (!checkWhiteSpaces(current)) {
             throw std::invalid_argument("Line no. " +
