@@ -17,7 +17,7 @@ The implementation itself (not counting tests) consists of two components: the l
 defines and implements API for usage in other projects. CLI provides demonstration of the library's functionality
 using command line arguments.
 
-    [Bitcoin Improvement Proposal 39]: https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki
+  [Bitcoin Improvement Proposal 39]: https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki
 
 Usage
 =====
@@ -36,3 +36,17 @@ Building the CMake projects creates three files - a `bip39` library, a `cli`, an
 API is described in the header files `dictionary.hpp` and `mnemonic.hpp`.
 
 ### CLI usage
+Availible arguments:
+    -h --help                   Prints out help similar to this one and quits
+    -d --dictionary             Sets path to file with dictionary (REQUIRED)
+    Exactly one of those three options are required:
+    -g --generate <entropy>     Generates mnemonic phrase and seed from input entropy file
+    -r --reverse <phrase>       Generates initial entropy and seed from mnemonic phrase
+    -c --check <phrase> <seed>  Checks if phrase generates seed
+
+### Testsuite
+The last binary runs all tests from `tests/` directory. Tests were written using
+[Catch2] unit testing framework which is already included in the repository, so it
+generates no additional prerequisites.
+
+  [Catch2]: https://github.com/catchorg/Catch2

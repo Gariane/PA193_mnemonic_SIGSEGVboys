@@ -33,11 +33,11 @@ void Dictionary::parseFile(std::ifstream& input) {
     int count = 0;
     while (!input.eof()) {
         std::getline(input, current);
-        if (input.eof()) {
-            break;
-        }
         if (input.bad()) {
             throw std::invalid_argument("Stream error");
+        }
+        if (input.eof()) {
+            break;
         }
         if (count >= DICTIONARY_SIZE) {
             throw std::length_error(
