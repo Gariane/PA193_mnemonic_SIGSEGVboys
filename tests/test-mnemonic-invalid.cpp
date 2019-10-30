@@ -38,11 +38,11 @@ TEST_CASE("INVALID TESTS WITH DICTIONARY EXCEPTIONS") {
     auto dict = Dictionary("../wordlists/english.txt");
 
     SECTION("Generation from phrase - bad words in mnemonic sentence") {
-        CHECK_THROWS_AS(Mnemonic("velmi zle slovo", "112", dict, Mnemonic::fromPhrase::Phrase), std::out_of_range); 
+        CHECK_THROWS_AS(Mnemonic("velmi zle slovo", "112", dict, Mnemonic::fromPhrase::Phrase), std::invalid_argument); 
     }
 
     SECTION("Phrase-Seed pair - bad words in mnemonic sentence") {
-        CHECK_THROWS_AS(Mnemonic::checkPhraseSeedPair("avokado", "badSeed", "qweqwe", dict), std::out_of_range);
+        CHECK_THROWS_AS(Mnemonic::checkPhraseSeedPair("avokado", "badSeed", "qweqwe", dict), std::invalid_argument);
     }
 }
 
