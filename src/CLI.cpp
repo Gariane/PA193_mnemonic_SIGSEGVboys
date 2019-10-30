@@ -31,9 +31,21 @@ private:
                     {nullptr, no_argument, nullptr, 0}
             };
 
-    void checkDict() {
+    void checkDictPath() {
         if(dictionary.empty()) {
             std::cerr << "No dictionary specified";
+            exit(1);
+        }
+    }
+
+    void checkDictThrow(Dictionary& dict) {
+        try {
+            dict.parse(dictionary);
+        } catch (std::length_error& error) {
+            std::cerr << error.what() << std::endl;
+            exit(1);
+        } catch (std::invalid_argument& error) {
+            std::cerr << error.what() << std::endl;
             exit(1);
         }
     }
@@ -60,8 +72,9 @@ private:
         }
         std::stringstream buffer;
         buffer << input.rdbuf();
-        checkDict();
-        Dictionary dict(dictionary);
+        checkDictPath();
+        Dictionary dict;
+        checkDictThrow(dict);
         Mnemonic mnem(buffer.str(), password, dict, Mnemonic::fromEntropy::Entropy);
         std::cout << "Generating from entropy: " << mnem.getEntropy() << std::endl;
         std::cout << "---------------------------------------------------------------------" << std::endl;
@@ -77,8 +90,9 @@ private:
         }
         std::stringstream buffer;
         buffer << input.rdbuf();
-        checkDict();
-        Dictionary dict(dictionary);
+        checkDictPath();
+        Dictionary dict;
+        checkDictThrow(dict);
         Mnemonic mnem(buffer.str(), password, dict, Mnemonic::fromPhrase::Phrase);
         std::cout << "Generated from phrase: " << mnem.getPhrase() << std::endl;
         std::cout << "---------------------------------------------------------------------" << std::endl;
@@ -99,8 +113,9 @@ private:
         std::stringstream buffer, buffer2;
         buffer << input.rdbuf();
         buffer2 << input2.rdbuf();
-        checkDict();
-        Dictionary dict(dictionary);
+        checkDictPath();
+        Dictionary dict;
+        checkDictThrow(dict);
         bool ok = Mnemonic::checkPhraseSeedPair(buffer.str(), buffer2.str(), password, dict);
         if(ok) {
             std::cout << "OK - provided phrase generated expected seed" << std::endl;
