@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <fstream>
+#include <iostream>
 #include <string>
 
 #define DICTIONARY_SIZE 2048
@@ -18,12 +19,16 @@ bool Dictionary::checkUniqueness(int size, const std::string &item) const {
 
 bool Dictionary::checkWhiteSpaces(const std::string &checked) const {
     if (checked.empty()) {
+        std::cerr << "Empty line" << std::endl;
         return false;
     }
+    int charno = 1;
     for (char chr : checked) {
         if (std::isspace(chr)) {
+            std::cerr << "Whitespace on position " << charno << std::endl;
             return false;
         }
+        charno++;
     }
     return true;
 }
@@ -44,7 +49,7 @@ void Dictionary::parseFile(std::ifstream &input) {
                 "Dictionary too long (2048 keywords expected)");
         }
         if (!checkWhiteSpaces(current)) {
-            throw std::invalid_argument("Invalid character on line " +
+            throw std::invalid_argument("Line no. " +
                                         std::to_string(count + 1));
         }
         if (!checkUniqueness(count, current)) {
