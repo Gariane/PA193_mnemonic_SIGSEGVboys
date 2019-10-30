@@ -84,7 +84,11 @@ Mnemonic::Mnemonic(std::string entropy, const std::string& passphrase, const BIP
           } 
 
           if (++counter == 11) {
-              addToPhrase(dict.getWord(currIndex));
+              try {
+                  addToPhrase(dict.getWord(currIndex));
+              } catch(const std::out_of_range& e) {
+                  throw std::runtime_error("Mnemonic sentence generation failed");
+              }
               counter = 0;
               currIndex = 0;
           }
@@ -183,7 +187,13 @@ std::vector<uint8_t> Mnemonic::getBytesFromPhrase(const std::string& phrase, con
     std::istringstream parser(phrase);
     std::string str;
     while (parser >> str) {
-        uint16_t val = dict.getIndex(str);
+        uint16_t val = 0;
+        try {
+            val = dict.getIndex(str);
+        } catch (const std::out_of_range& e) {
+            throw std::invalid_argument("Phrase contains word not present in dictionary: " + str);
+        }
+
         for (int i = 0; i < 11; ++i) {
             bool currentBitInVal = (val & (0x8000 >> (5 + i)));
             if (currentBitInVal) {
