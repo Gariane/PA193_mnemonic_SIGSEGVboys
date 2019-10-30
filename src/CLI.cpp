@@ -4,11 +4,9 @@
 using BIP39::Dictionary;
 using BIP39::Mnemonic;
 
-#include <stdlib.h>
 #include <getopt.h>
 #include <iostream>
 #include <sstream>
-#include <cstring>
 
 class Parser {
 private:
@@ -34,19 +32,41 @@ private:
     void checkDictPath() {
         if(dictionary.empty()) {
             std::cerr << "No dictionary specified";
-            exit(1);
+            std::exit(1);
         }
     }
 
-    void checkDictThrow(Dictionary& dict) {
+    Dictionary checkDictThrow() {
         try {
-            dict.parse(dictionary);
+            return Dictionary(dictionary);
         } catch (std::length_error& error) {
             std::cerr << error.what() << std::endl;
-            exit(1);
+            std::exit(1);
         } catch (std::invalid_argument& error) {
             std::cerr << error.what() << std::endl;
-            exit(1);
+            std::exit(1);
+        }
+    }
+
+    Mnemonic checkMnemThrow(const std::stringstream& buffer, const Dictionary& dict, bool fromEntropy) {
+        try {
+            if(fromEntropy) return Mnemonic(buffer.str(), password, dict, Mnemonic::fromEntropy::Entropy);
+            else return Mnemonic(buffer.str(), password, dict, Mnemonic::fromPhrase::Phrase);
+        } catch (std::runtime_error& error) {
+            std::cerr << error.what() << std::endl;
+            std::exit(1);
+        } catch (std::invalid_argument& error) {
+            std::cerr << error.what() << std::endl;
+            std::exit(1);
+        }
+    }
+
+    bool checkPhraseThrow(const std::stringstream& phraseBuffer, const std::stringstream& seedBuffer, const Dictionary& dict) {
+        try {
+            return Mnemonic::checkPhraseSeedPair(phraseBuffer.str(), seedBuffer.str(), password, dict);
+        } catch (std::invalid_argument& error) {
+            std::cerr << error.what() << std::endl;
+            std::exit(1);
         }
     }
 
@@ -70,12 +90,11 @@ private:
         if (input.fail()) {
             throw std::invalid_argument("Invalid path: " + entropy);
         }
-        std::stringstream buffer;
-        buffer << input.rdbuf();
+        std::stringstream entropyBuffer;
+        entropyBuffer << input.rdbuf();
         checkDictPath();
-        Dictionary dict;
-        checkDictThrow(dict);
-        Mnemonic mnem(buffer.str(), password, dict, Mnemonic::fromEntropy::Entropy);
+        Dictionary dict = checkDictThrow();
+        Mnemonic mnem = checkMnemThrow(entropyBuffer, dict, true);
         std::cout << "Generating from entropy: " << mnem.getEntropy() << std::endl;
         std::cout << "---------------------------------------------------------------------" << std::endl;
         std::cout << "Generated phrase: " << mnem.getPhrase() << std::endl;
@@ -88,12 +107,11 @@ private:
         if (input.fail()) {
             throw std::invalid_argument("Invalid path: " + phrase);
         }
-        std::stringstream buffer;
-        buffer << input.rdbuf();
+        std::stringstream phraseBuffer;
+        phraseBuffer << input.rdbuf();
         checkDictPath();
-        Dictionary dict;
-        checkDictThrow(dict);
-        Mnemonic mnem(buffer.str(), password, dict, Mnemonic::fromPhrase::Phrase);
+        Dictionary dict = checkDictThrow();;
+        Mnemonic mnem = checkMnemThrow(phraseBuffer, dict, false);
         std::cout << "Generated from phrase: " << mnem.getPhrase() << std::endl;
         std::cout << "---------------------------------------------------------------------" << std::endl;
         std::cout << "Generated entropy: " << mnem.getEntropy() << std::endl;
@@ -110,13 +128,12 @@ private:
         if (input2.fail()) {
             throw std::invalid_argument("Invalid path: " + seed);
         }
-        std::stringstream buffer, buffer2;
-        buffer << input.rdbuf();
-        buffer2 << input2.rdbuf();
+        std::stringstream phraseBuffer, seedBuffer;
+        phraseBuffer << input.rdbuf();
+        seedBuffer << input2.rdbuf();
         checkDictPath();
-        Dictionary dict;
-        checkDictThrow(dict);
-        bool ok = Mnemonic::checkPhraseSeedPair(buffer.str(), buffer2.str(), password, dict);
+        Dictionary dict = checkDictThrow();;
+        bool ok = checkPhraseThrow(phraseBuffer, seedBuffer, dict);
         if(ok) {
             std::cout << "OK - provided phrase generated expected seed" << std::endl;
         } else {
@@ -135,7 +152,7 @@ public:
             {
                 case 'h':
                     printHelp();
-                    exit(0);
+                    std::exit(0);
                 case 'd':
                     dictionary = optarg;
                     break;
@@ -145,7 +162,7 @@ public:
                 case 'c':
                     if(generate || reverse) {
                         std::cerr << "A function has already been specified";
-                        exit(1);
+                        std::exit(1);
                     }
                     check = true;
                     if (optind < argc && argv[optind][0] != '-') {
@@ -155,13 +172,13 @@ public:
                     } else {
                         std::cerr << "Wrong parameter specified, use -h or --help for usage info";
                         printHelp();
-                        exit(1);
+                        std::exit(1);
                     }
                     break;
                 case 'g':
                     if(check || reverse) {
                         std::cerr << "A function has already been specified";
-                        exit(1);
+                        std::exit(1);
                     }
                     generate = true;
                     entropy = optarg;
@@ -169,7 +186,7 @@ public:
                 case 'r':
                     if(check || generate) {
                         std::cerr << "A function has already been specified";
-                        exit(1);
+                        std::exit(1);
                     }
                     reverse = true;
                     phrase = optarg;
@@ -177,25 +194,13 @@ public:
                 default:
                     std::cerr << "Wrong parameter specified, use -h or --help for usage info";
                     printHelp();
-                    exit(1);
+                    std::exit(1);
             }
         }
         if(generate) funcGenerate();
         if(reverse) funcReverse();
         if(check) funcCheck();
     }
-
-    //TODO remove when not needed
-    /*void printArguments() {
-        std::cout << "Dictionary: " << dictionary << std::endl;
-        std::cout << "Password: " << password << std::endl;
-        std::cout << "Entropy: " << entropy << std::endl;
-        std::cout << "Phrase: " << phrase << std::endl;
-        std::cout << "Seed: " << seed << std::endl;
-        if(check) std::cout << "-c ";
-        if(generate) std::cout << "-g ";
-        if(reverse) std::cout << "-r ";
-    }*/
 
     static void printHelp() {
         std::cout << "Arguments:" << std::endl;
