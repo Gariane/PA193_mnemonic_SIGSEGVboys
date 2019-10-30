@@ -151,8 +151,8 @@ std::string Mnemonic::generateSeed(const std::string &mnemonic,
 
     int ret =
         PKCS5_PBKDF2_HMAC(mnemonic.c_str(), mnemonic.length(),
-                          reinterpret_cast<const unsigned char *>(salt.c_str()),
-                          salt.length(),  // NOLINT must use reinterpret_cast
+                          reinterpret_cast<const unsigned char *>(salt.c_str()),    // NOLINT must use reinterpret_cast
+                          salt.length(),
                           2048, EVP_sha512(), 64, out);
 
     if (ret != 1) {

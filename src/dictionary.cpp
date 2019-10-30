@@ -85,8 +85,8 @@ std::string Dictionary::getWord(unsigned index) const {
 }
 
 unsigned Dictionary::getIndex(const std::string &keyword) const {
-    auto iterator =
-        keyWords.begin();  // NOLINT just here to be able to use 'auto'
+    auto iterator =         // NOLINT just here to be able to use 'auto'
+        keyWords.begin();
     if (sorted) {
         iterator = std::lower_bound(keyWords.begin(), keyWords.end(), keyword);
     } else {

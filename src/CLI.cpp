@@ -49,11 +49,11 @@ class Parser {
     Mnemonic checkMnemThrow(const std::stringstream &buffer,
                             const Dictionary &dict, bool fromEntropy) {
         try {
-            if (fromEntropy)
+            if (fromEntropy) {
                 return Mnemonic(buffer.str(), password, dict,
                                 Mnemonic::fromEntropy::Entropy);
-            else
-                return Mnemonic(buffer.str(), password, dict,
+            }
+            return Mnemonic(buffer.str(), password, dict,
                                 Mnemonic::fromPhrase::Phrase);
         } catch (std::runtime_error &error) {
             std::cerr << error.what() << std::endl;
