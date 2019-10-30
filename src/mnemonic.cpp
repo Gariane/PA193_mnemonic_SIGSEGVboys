@@ -10,6 +10,8 @@
 
 namespace {
 
+// following two functions were inspired by https://tweex.net/post/c-anything-tofrom-a-hex-string/
+
 std::vector<uint8_t> stringToBytes(const std::string& in) {
     size_t length = in.length();
 
