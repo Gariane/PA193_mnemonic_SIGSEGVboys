@@ -66,7 +66,7 @@ matrix:
           packages:
             - clang-tidy
       script:
-        - clang-tidy -header-filter=.* ../src/*.cpp -- -std=c++17
+        - clang-tidy -header-filter=.* ../src/*.cpp -- -std=c++17 -I../headers
 
     # cppcheck analysis
     - os: linux
@@ -78,7 +78,7 @@ matrix:
             - cppcheck 
       script:
         - cppcheck --version
-        - cppcheck --error-exitcode=1 --enable=all ../src/*.hpp ../src/*.cpp
+        - cppcheck --error-exitcode=1 --enable=all ../headers/*.hpp ../src/*.cpp
 
     # valgrind memcheck
     - os: linux
