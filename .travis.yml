@@ -97,11 +97,11 @@ matrix:
         - valgrind --version
         - travis_wait 30 valgrind --tool=memcheck --leak-check=full --show-reachable=yes --track-origins=yes --error-exitcode=1 ./testsuite
 
-    # valgrind sgcheck
+    # sanitizers 
     - os: linux
       compiler: gcc
       env:
-        - TEST="Valgrind"
+        - TEST="Sanitizers"
       addons:
         apt:
           packages:
@@ -109,7 +109,7 @@ matrix:
               - openssl
               - valgrind
       script:
-        - cmake .. -DENABLE_VALGRIND=ON -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
-        - make all
-        - valgrind --version
-        - travis_wait 30 valgrind --tool=exp-sgcheck --error-exitcode=1 ./testsuite
+        - cmake .. -DENABLE_UB_SANITIZER=ON -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+        - make runtest
+        - cmake .. -DENABLE_AD_SANITIZER=ON -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+        - make runtest
