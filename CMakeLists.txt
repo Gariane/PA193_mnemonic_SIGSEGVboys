@@ -31,7 +31,7 @@ set(testBin "testsuite")
 set(testSources "tests/test-main.cpp" "tests/test-utils.cpp" "tests/test-mnemonic.cpp")
 
 set(libName "bip39")
-set(libSources "src/mnemonic.cpp")
+set(libSources "src/mnemonic.cpp" "src/dictionary.cpp")
 
 find_package(OpenSSL REQUIRED)
 include_directories(src tests)
