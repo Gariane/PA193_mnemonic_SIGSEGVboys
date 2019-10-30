@@ -48,7 +48,7 @@ set(cliBin "cli")
 set(cliSources "src/CLI.cpp")
 
 find_package(OpenSSL REQUIRED)
-include_directories(src tests)
+include_directories(src tests headers)
 add_library(${libName} ${libSources})
 target_link_libraries(${libName} OpenSSL::SSL)
 
