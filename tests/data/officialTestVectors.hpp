@@ -1,8 +1,7 @@
 #ifndef officialTestVectors_hpp
 #define officialTestVectors_hpp
 
-#include <array>
-
+#include <vector>
 #include "testData.hpp"
 
 const std::vector<testData> officialTestVectors = {

@@ -1,6 +1,7 @@
-#include <sstream>
-#include <iomanip>
+#include <algorithm>
 #include <cmath>
+#include <iomanip>
+#include <sstream>
 
 #include <openssl/sha.h>
 #include <openssl/evp.h>
@@ -61,7 +62,9 @@ Mnemonic::Mnemonic(std::string entropy, const std::string& passphrase, const BIP
     if (originalEntropy_.length() < 32 || originalEntropy_.length() > 64 || originalEntropy_.length() % 8 != 0) {
         throw std::invalid_argument("Entropy size is invalid");
     }
-    if (originalEntropy_.find_first_not_of("1234567890abcdefABCDEF") != std::string::npos) {
+
+    std::transform(originalEntropy_.begin(), originalEntropy_.end(), originalEntropy_.begin(), [](char c){ return std::tolower(c); });
+    if (originalEntropy_.find_first_not_of("1234567890abcdef") != std::string::npos) {
         throw std::invalid_argument("Entropy is not hexadecimal string");
     }
 
