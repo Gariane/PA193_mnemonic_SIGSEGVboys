@@ -62,6 +62,20 @@ class Mnemonic {
      */
     Mnemonic(std::string phrase, const std::string &passphrase,
              const BIP39::Dictionary &dict, fromPhrase /* unused */);
+    
+    /**
+     * Rule of five
+     */
+    Mnemonic(const Mnemonic& /* unused */) = default;
+    Mnemonic& operator=(const Mnemonic& /* unused */) = default;
+
+    Mnemonic(Mnemonic&& /* unused */) = default;
+    Mnemonic& operator=(Mnemonic&& /* unused */) = default;
+
+    /**
+     * @brief Clears contained sensitive data
+     */
+    ~Mnemonic();
 
     /**
      * @brief Entropy getter

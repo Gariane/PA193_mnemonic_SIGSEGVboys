@@ -6,6 +6,7 @@ using BIP39::Mnemonic;
 
 #include <getopt.h>
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 
@@ -77,18 +78,10 @@ class Parser {
     }
 
     void cleanUp() {
-        for (char &i : password) {
-            i = '\0';
-        }
-        for (char &i : phrase) {
-            i = '\0';
-        }
-        for (char &i : seed) {
-            i = '\0';
-        }
-        for (char &i : entropy) {
-            i = '\0';
-        }
+        std::fill(password.begin(), password.end(), 0);
+        std::fill(phrase.begin(), phrase.end(), 0);
+        std::fill(seed.begin(), seed.end(), 0);
+        std::fill(entropy.begin(), entropy.end(), 0);
     }
 
     void funcGenerate() {

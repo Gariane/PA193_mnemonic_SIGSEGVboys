@@ -122,6 +122,12 @@ Mnemonic::Mnemonic(std::string phrase, const std::string &passphrase,
     seed_ = generateSeed(phrase_, passphrase);
 }
 
+Mnemonic::~Mnemonic() {
+    std::fill(originalEntropy_.begin(), originalEntropy_.end(), 0);
+    std::fill(phrase_.begin(), phrase_.end(), 0);
+    std::fill(seed_.begin(), seed_.end(), 0);
+}
+
 std::string Mnemonic::getEntropy() const { return originalEntropy_; }
 
 std::string Mnemonic::getPhrase() const { return phrase_; }
