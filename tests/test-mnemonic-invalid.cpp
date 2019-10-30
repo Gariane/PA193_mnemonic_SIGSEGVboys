@@ -72,10 +72,10 @@ TEST_CASE("INVALID TESTS WITH MNEMONIC EXCEPTIONS") {
         CHECK_THROWS_AS(Mnemonic("1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5aabcd123c", "dummy", dict), std::invalid_argument);
     }
     SECTION("ENTROPY NOT HEX STRING") {
-        CHECK_THROWS_AS(Mnemonic("1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d1a2b3c4d5e6f1a2b3c4d5e6f1a2b3cXDD", "", dict), std::invalid_argument);
-        CHECK_THROWS_AS(Mnemonic("1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d1a2b3c4d5e6f1a2b3c4d5e6f1a2b3cXDD", "dummy", dict), std::invalid_argument);
-        CHECK_THROWS_AS(Mnemonic("1a2b3c4d5e6f1a2b3c4d5e6f1HHHHHHHHHHb3c4d5e6f1a2b3c4d5e6f1a2b3c123", "", dict), std::invalid_argument);
-        CHECK_THROWS_AS(Mnemonic("1a2b3c4d5e6f1a2b3c4d5e6f1HHHHHHHHHHb3c4d5e6f1a2b3c4d5e6f1a2b3c123", "dummy", dict), std::invalid_argument);
+        CHECK_THROWS_AS(Mnemonic("1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d1a2b3c4d5e6f1a2b3c4d5e6f1a2b3cXD", "", dict), std::invalid_argument);
+        CHECK_THROWS_AS(Mnemonic("1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d1a2b3c4d5e6f1a2b3c4d5e6f1a2b3cXD", "dummy", dict), std::invalid_argument);
+        CHECK_THROWS_AS(Mnemonic("1a2b3c4d5e6f1a2b3c4d5e6f1HHHHHHHHHHb3c4d5e6f1a2b3c4d5e6f1a2b3c12", "", dict), std::invalid_argument);
+        CHECK_THROWS_AS(Mnemonic("1a2b3c4d5e6f1a2b3c4d5e6f1HHHHHHHHHHb3c4d5e6f1a2b3c4d5e6f1a2b3c12", "dummy", dict), std::invalid_argument);
     }
 
     SECTION("PHRASE CONSTRUCTION CHECKSUM NOT VALID") {
