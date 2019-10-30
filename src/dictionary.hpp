@@ -26,15 +26,16 @@ class Dictionary {
      * meet these conditions:
      * 1. words are separated with newlines, 1 word - 1 line
      *  - that means there should be exactly 2048 lines (std::length_error)
-     * 2. No duplicate words are allowed (std::invalid_argument)
+     * 2. No duplicate words are allowed
      *  - it ruins the determinism in mnemonic->entropy transition
      * 3. File has utf-8 encoding
      *  - from the specification of BIP-39
      * 4. Trailing whitespaces, trailing newlines, empty lines,
      *  multiple words on a single line, invalid utf-8 garbage, assignment-4
      * payloads, proofs that Bush did 9/11 are not allowed
-     * (std::invalid_argument)
      * @param path - path to the UTF-8 encoded dictionary
+     * @throws std::length_error on violation of rule 1
+     * @throws std::invalid_argument on violation of everything else
      */
     explicit Dictionary(const std::string& path);
 
@@ -48,8 +49,8 @@ class Dictionary {
     /**
      * @brief gets word at index i
      * @param index in range 0-2047
-     * @return word at index i, or throws std::out_of_range if i is out of
-     * bounds
+     * @return word at index i
+     * @throws std::out of range if index is not in allowed range
      */
     std::string getWord(unsigned index) const;
 
@@ -61,8 +62,8 @@ class Dictionary {
      * sorted, and if it is - it uses binary search, otherwise it will use
      * sequential search
      * @param keyword: searched word
-     * @return index in range 0-2047, or throws std::out_of_range if index is
-     * not found
+     * @return index in range 0-2047
+     * @throws std::out_of_range if word is not present in the dictionary
      */
     unsigned getIndex(const std::string& keyword) const;
 
