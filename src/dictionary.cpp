@@ -46,11 +46,9 @@ void Dictionary::parseFile(std::ifstream &input) {
             throw std::length_error(
                 "Dictionary too long (2048 keywords expected)");
         }
-#if defined(_WIN32) || defined(_WIN64)
         if (!current.empty() && current.back() == '\r') {
             current.pop_back();
         }
-#endif
         if (!checkWhiteSpaces(current)) {
             throw std::invalid_argument("Line no. " +
                                         std::to_string(count + 1));
