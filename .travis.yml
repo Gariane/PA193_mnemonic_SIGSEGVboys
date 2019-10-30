@@ -80,7 +80,7 @@ matrix:
         - cppcheck --version
         - cppcheck --error-exitcode=1 --enable=all ../src/*.hpp ../src/*.cpp
 
-    # valgrind
+    # valgrind memcheck
     - os: linux
       compiler: gcc
       env:
@@ -95,4 +95,21 @@ matrix:
         - cmake .. -DENABLE_VALGRIND=ON -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
         - make all
         - valgrind --version
-        - valgrind --leak-check=full --show-reachable=yes --track-origins=yes --error-exitcode=1 ./testsuite
+        - travis_wait 30 valgrind --tool=memcheck --leak-check=full --show-reachable=yes --track-origins=yes --error-exitcode=1 ./testsuite
+
+    # valgrind sgcheck
+    - os: linux
+      compiler: gcc
+      env:
+        - TEST="Valgrind"
+      addons:
+        apt:
+          packages:
+              - g++ 
+              - openssl
+              - valgrind
+      script:
+        - cmake .. -DENABLE_VALGRIND=ON -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+        - make all
+        - valgrind --version
+        - travis_wait 30 valgrind --tool=exp-sgcheck --error-exitcode=1 ./testsuite
