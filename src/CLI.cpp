@@ -171,7 +171,7 @@ class Parser {
                     break;
                 case 'c':
                     if (taskSpecified) {
-                        std::cerr << "A function has already been specified" << std::endl;
+                        std::cerr << "A function has already been specified, please choose only 1" << std::endl;
                         std::exit(1);
                     }
                     check = true;
@@ -188,7 +188,7 @@ class Parser {
                     break;
                 case 'g':
                     if (taskSpecified) {
-                        std::cerr << "A function has already been specified" << std::endl;
+                        std::cerr << "A function has already been specified, please choose only 1" << std::endl;
                         std::exit(1);
                     }
                     generate = true;
@@ -197,7 +197,7 @@ class Parser {
                     break;
                 case 'r':
                     if (taskSpecified) {
-                        std::cerr << "A function has already been specified" << std::endl;
+                        std::cerr << "A function has already been specified, please choose only 1" << std::endl;
                         std::exit(1);
                     }
                     reverse = true;
