@@ -37,14 +37,14 @@ API is described in the header files `dictionary.hpp` and `mnemonic.hpp`.
 
 ### CLI usage
 Availible arguments:
-    ```
-    -h --help                   Prints out help similar to this one and quits
-    -d --dictionary             Sets path to file with dictionary (REQUIRED)
-    Exactly one of those three options are required:
-    -g --generate <entropy>     Generates mnemonic phrase and seed from input entropy file
-    -r --reverse <phrase>       Generates initial entropy and seed from mnemonic phrase
-    -c --check <phrase> <seed>  Checks if phrase generates seed
-    ```
+```
+-h --help                   Prints out help similar to this one and quits
+-d --dictionary             Sets path to file with dictionary (REQUIRED)
+Exactly one of those three options are required:
+-g --generate <entropy>     Generates mnemonic phrase and seed from input entropy file
+-r --reverse <phrase>       Generates initial entropy and seed from mnemonic phrase
+-c --check <phrase> <seed>  Checks if phrase generates seed
+```
 
 ### Testsuite
 The last binary runs all tests from `tests/` directory. Tests were written using
