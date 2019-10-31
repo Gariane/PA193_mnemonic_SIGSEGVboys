@@ -32,7 +32,10 @@ class Dictionary {
      *  - from the specification of BIP-39
      * 4. Trailing whitespaces, trailing newlines, empty lines,
      *  multiple words on a single line, invalid utf-8 garbage, assignment-4
-     * payloads, proofs that Bush did 9/11 are not allowed
+     *  payloads, proofs that Bush did 9/11 are not allowed
+     * 5. max line length is 1024 bytes (don't tell me some languages have
+     * longer words than that, noone will believe you)
+     *  - 1023 for Windows because getline reads extra \r
      * @param path - path to the UTF-8 encoded dictionary
      * @throws std::length_error on violation of rule 1
      * @throws std::invalid_argument on violation of everything else

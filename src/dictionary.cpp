@@ -33,14 +33,21 @@ bool Dictionary::checkWhiteSpaces(const std::string &checked) const {
 
 void Dictionary::parseFile(std::ifstream &input) {
     std::string current;
+    char buf[1025];
     int count = 0;
     while (!input.eof()) {
-        std::getline(input, current);
+        //std::getline(input, current);
+        input.getline(buf, 1025);
+        current = buf;
         if (input.bad()) {
             throw std::invalid_argument("Stream error");
         }
-        if (input.eof()) {
+        if ( current.length() != 1024 && input.eof()) {
             break;
+        }
+        if (input.fail()) {
+            throw std::length_error(
+                "Maximum keyword length exceeded (1024)");
         }
         if (count >= DICTIONARY_SIZE) {
             throw std::length_error(
