@@ -23,7 +23,8 @@ class Mnemonic {
     /**
      * Enum which indicates to constructor that we generate from entropy
      */
-    enum class fromEntropy { Entropy };
+    enum class fromEntropy { Entropy, BinaryEntropy
+	};
 
     /**
      * Enum which indicates to constructor that we generate from mnemonic phrase

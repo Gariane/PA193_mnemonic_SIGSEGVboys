@@ -3,11 +3,13 @@
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 
+#include <cctype>
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
 #include <sstream>
-
+#include <string>
+// this namespace could have been in seperate file for simpler decomposition
 namespace {
 
 // following two functions were inspired by
@@ -22,21 +24,21 @@ std::vector<uint8_t> stringToBytes(const std::string &in) {
     std::stringstream hexStringStream;
     hexStringStream >> std::hex;
 
-    for (size_t strIndex = 0, dataIndex = 0; strIndex < length; ++dataIndex) {
-        const char tmpStr[3] = {in[strIndex++], in[strIndex++], 0};
+    for (size_t strIndex = 0, dataIndex = 0; strIndex < length; ++dataIndex) {//datindex is unused, at least it seems to be unused
+        const char tmpStr[3] = {in[strIndex++], in[strIndex++], 0};// are u sure that there is always even number of characters??
 
         hexStringStream.clear();
         hexStringStream.str(tmpStr);
 
         int tmpValue = 0;
         hexStringStream >> tmpValue;
-        out.push_back(static_cast<unsigned char>(tmpValue));
+        out.push_back(static_cast<unsigned char>(tmpValue));//static cast to unsigned char, but vector is of type uint8_t - could be unified
     }
 
     return out;
 }
 
-std::string bytesToString(const uint8_t *data, size_t dataLength) {
+std::string bytesToString(const uint8_t *data, size_t dataLength) { // i would use std::array, that would allow use f iterators, no dataLength needed, and reverse the call to vector one
     std::stringstream hexStringStream;
 
     hexStringStream << std::hex << std::setfill('0');
@@ -57,20 +59,38 @@ namespace BIP39 {
 
 Mnemonic::Mnemonic(std::string entropy, const std::string &passphrase,
                    const BIP39::Dictionary &dict,
-                   BIP39::Mnemonic::fromEntropy /* unused */)
+                   BIP39::Mnemonic::fromEntropy format)
     : originalEntropy_(std::move(entropy)) {
-    if (originalEntropy_.length() < 32 || originalEntropy_.length() > 64 ||
-        originalEntropy_.length() % 8 != 0) {
-        throw std::invalid_argument("Entropy size is invalid");
-    }
 
-    std::transform(originalEntropy_.begin(), originalEntropy_.end(),
-                   originalEntropy_.begin(),
-                   [](char c) { return std::tolower(c); });
-    if (originalEntropy_.find_first_not_of("1234567890abcdef") !=
-        std::string::npos) {
-        throw std::invalid_argument("Entropy is not hexadecimal string");
-    }
+	if (format == BIP39::Mnemonic::fromEntropy::BinaryEntropy) {
+		if (originalEntropy_.size() % 4 != 0) {
+			throw std::invalid_argument("Binary Entropy size is invalid");
+		}
+		if (originalEntropy_.find_first_not_of("10") !=
+			std::string::npos) {
+			throw std::invalid_argument("Entropy is not hexadecimal string");
+		}
+		std::stringstream buff;
+		for (unsigned i = 0; i < originalEntropy_.size() / 4; i++) {
+			buff << std::stoi(originalEntropy_.substr(i*4,4),nullptr,2);
+		}
+		originalEntropy_ = buff.str();
+	}
+
+	
+	if (originalEntropy_.length() < 32 || originalEntropy_.length() > 64 ||
+		originalEntropy_.length() % 8 != 0) {
+		throw std::invalid_argument("Entropy size is invalid");
+	}
+
+	std::transform(originalEntropy_.begin(), originalEntropy_.end(),
+		originalEntropy_.begin(),
+		[](char c) { return std::tolower(c); });
+	if (originalEntropy_.find_first_not_of("1234567890abcdef") !=
+		std::string::npos) {
+		throw std::invalid_argument("Entropy is not hexadecimal string");
+	}
+	
 
     std::vector<uint8_t> entropyChar = stringToBytes(originalEntropy_);
 
@@ -84,12 +104,12 @@ Mnemonic::Mnemonic(std::string entropy, const std::string &passphrase,
         for (int i = 0; i < 8; ++i) {
             bool currBitInVal = (val & (0x80 >> i));
             if (currBitInVal) {
-                currIndex |= 0x8000 >> (5 + counter);
+                currIndex |= 0x8000 >> (5 + counter);//why +5?? just shift 0x8000 so u dont have to add 5 to the shift, or at least comment the reason to to add 5. 
             }
 
             if (++counter == 11) {
                 try {
-                    addToPhrase(dict.getWord(currIndex));
+                    addToPhrase(dict.getWord(currIndex)); // could have been verified to never reach such state throw is caused, or could have separeted expression and added assert to index range within constructor.
                 } catch (const std::out_of_range &e) {
                     throw std::runtime_error(
                         "Mnemonic sentence generation failed");
@@ -199,7 +219,7 @@ std::vector<uint8_t> Mnemonic::getBytesFromPhrase(const std::string &phrase,
 
     int counter = 0;
     uint8_t currentChar = 0;
-
+	
     std::istringstream parser(phrase);
     std::string str;
     while (parser >> str) {
