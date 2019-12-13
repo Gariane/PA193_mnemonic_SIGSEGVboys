@@ -91,6 +91,30 @@ TEST_CASE("INVALID TESTS WITH MNEMONIC EXCEPTIONS") {
         CHECK_THROWS_AS(Mnemonic::checkPhraseSeedPair("all hour make first leader extend hole alien behind guard gospel lava path output census museum junior mass reopen famous sing advance salt winner", "", "", dict), std::invalid_argument);
         CHECK_THROWS_AS(Mnemonic::checkPhraseSeedPair("all hour make first leader extend hole alien behind guard gospel lava path output census museum junior mass reopen famous sing advance salt winner", "dummySEED", "dummyPASS", dict), std::invalid_argument);
     }
+
+	/*New tests for bin format*/
+	SECTION("BIN ENTROPY TOO SHORT") {
+		CHECK_THROWS_AS(Mnemonic("", "", dict, BIP39::Mnemonic::fromEntropy::BinaryEntropy), std::invalid_argument);
+		CHECK_THROWS_AS(Mnemonic("01111100", "asd", dict, BIP39::Mnemonic::fromEntropy::BinaryEntropy), std::invalid_argument);
+		CHECK_THROWS_AS(Mnemonic("001110001010", "", dict, BIP39::Mnemonic::fromEntropy::BinaryEntropy), std::invalid_argument);
+		CHECK_THROWS_AS(Mnemonic("01110000101010101", "asd", dict, BIP39::Mnemonic::fromEntropy::BinaryEntropy), std::invalid_argument);
+		CHECK_THROWS_AS(Mnemonic("11111111111111111111111111100000000001111111111", "", dict, BIP39::Mnemonic::fromEntropy::BinaryEntropy), std::invalid_argument);
+		CHECK_THROWS_AS(Mnemonic("11111111111111111111111000000000000000000011111", "asd", dict, BIP39::Mnemonic::fromEntropy::BinaryEntropy), std::invalid_argument);
+	}
+	SECTION("BIN ENTROPY TOO LONG") {
+		CHECK_THROWS_AS(Mnemonic("11111111111111111111000000000000010100000000000011000101010101010101111111111111111111100000000000000000000000001010010101010101010101010101010101010101010101010101011010101010000000000000000000000000001111111111111111111111111111111100000000000000000000000111111111", "", dict), std::invalid_argument);
+		CHECK_THROWS_AS(Mnemonic("00000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001", "xd", dict), std::invalid_argument);
+	}
+	SECTION("BIN ENTROPY NOT MULTIPLE OF 32 BITS") {
+		CHECK_THROWS_AS(Mnemonic("0000000000000000000000000100000000000000000000000000000000000000000011100000000000000000000000000000000000000000000000000000000011111111", "", dict), std::invalid_argument);
+		CHECK_THROWS_AS(Mnemonic("000000000000000000000000010000101010101010101010101010101010100000000000000000000000000000000000000011100000000000000000000000000000000000000000000000000000000011111111", "dummy", dict), std::invalid_argument);
+	}
+	SECTION("BIN ENTROPY NOT BIN STRING") {
+		CHECK_THROWS_AS(Mnemonic("1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d1a2b3c4d5e6f1a2b3c4d5e6f1a2b3cXD", "", dict), std::invalid_argument);
+		CHECK_THROWS_AS(Mnemonic("1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d1a2b3c4d5e6f1a2b3c4d5e6f1a2b3cXD", "dummy", dict), std::invalid_argument);
+		CHECK_THROWS_AS(Mnemonic("1a2b3c4d5e6f1a2b3c4d5e6f1HHHHHHHHHHb3c4d5e6f1a2b3c4d5e6f1a2b3c12", "", dict), std::invalid_argument);
+		CHECK_THROWS_AS(Mnemonic("1a2b3c4d5e6f1a2b3c4d5e6f1HHHHHHHHHHb3c4d5e6f1a2b3c4d5e6f1a2b3c12", "dummy", dict), std::invalid_argument);
+	}
 }
 
 

@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <iostream>
 // this namespace could have been in seperate file for simpler decomposition
 namespace {
 
@@ -63,7 +64,7 @@ Mnemonic::Mnemonic(std::string entropy, const std::string &passphrase,
     : originalEntropy_(std::move(entropy)) {
 
 	if (format == BIP39::Mnemonic::fromEntropy::BinaryEntropy) {
-		if (originalEntropy_.size() % 4 != 0) {
+		if (originalEntropy_.length() % 4 != 0) {
 			throw std::invalid_argument("Binary Entropy size is invalid");
 		}
 		if (originalEntropy_.find_first_not_of("10") !=
@@ -71,8 +72,8 @@ Mnemonic::Mnemonic(std::string entropy, const std::string &passphrase,
 			throw std::invalid_argument("Entropy is not hexadecimal string");
 		}
 		std::stringstream buff;
-		for (unsigned i = 0; i < originalEntropy_.size() / 4; i++) {
-			buff << std::stoi(originalEntropy_.substr(i*4,4),nullptr,2);
+		for (unsigned i = 0; i < originalEntropy_.length() / 4; i++) {
+			buff << std::hex << std::stoi(originalEntropy_.substr(i*4,4),nullptr,2);
 		}
 		originalEntropy_ = buff.str();
 	}
