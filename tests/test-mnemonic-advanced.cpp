@@ -5,7 +5,7 @@
 #include "mnemonic.hpp"
 #include "dictionary.hpp"
 #include "data/testData.hpp"
-
+#include <cctype>
 using BIP39::Mnemonic;
 using BIP39::Dictionary;
 
@@ -27,6 +27,16 @@ void checkMnemonic(const std::string& entropy, const std::string& password, cons
     mnemonic = Mnemonic(mnemonic.getPhrase(), password, dict, Mnemonic::fromPhrase::Phrase);
     checkAll(mnemonic, entropy, seed, sentence);
     CHECK(Mnemonic::checkPhraseSeedPair(mnemonic.getPhrase(), mnemonic.getSeed(), password, dict));
+}
+
+void checkBinMnemonic(const std::string& entropy, const std::string& password, const std::string& seed, const std::string& sentence, const Dictionary& dict,const std::string& entropyHex) {
+	auto mnemonic = Mnemonic(entropy, password, dict, BIP39::Mnemonic::fromEntropy::BinaryEntropy);
+	checkAll(mnemonic, entropyHex, seed, sentence);
+	CHECK(Mnemonic::checkPhraseSeedPair(mnemonic.getPhrase(), mnemonic.getSeed(), password, dict));
+
+	mnemonic = Mnemonic(mnemonic.getPhrase(), password, dict, Mnemonic::fromPhrase::Phrase);
+	checkAll(mnemonic, entropyHex, seed, sentence);
+	CHECK(Mnemonic::checkPhraseSeedPair(mnemonic.getPhrase(), mnemonic.getSeed(), password, dict));
 }
 
 TEST_CASE("VERY COMPLEX PASSWORDS") {
@@ -123,4 +133,34 @@ TEST_CASE("ENTROPY WITH BIG LETTERS") {
             "spoon sing upset another glass nasty horror such nerve damp equip loop virtual toe deposit prefer half poet time calm believe adjust coral lens",
             dict);
     }
+}
+
+
+TEST_CASE("BIN ENTROPY") {
+	std::string entropy1 = "10001000001011101000101111110011101010100011010001111110111000111000011100010010011010010111001010100011111100010011011100101011";
+	std::string entropy2 = "1101001010011001001010111011110010000100110001100010111100100110010110110110111011000011100101000110011011100101001100001100000111111111010001111100011100001110110001010100111001101000011101001110011110001001000100000100000101001010000001110000110000001100";
+	std::string password = "this is password";
+	std::string entropy1hex = "882E8BF3AA347EE387126972A3F1372B";
+	std::string entropy2hex = "D2992BBC84C62F265B6EC39466E530C1FF47C70EC54E6874E78910414A070C0C";
+	auto dict = Dictionary("../wordlists/english.txt");
+
+	SECTION("WITH PASSWORD") {
+		checkBinMnemonic(entropy1, password, "8ced03f39fb017719d98c7e58109317959eefc9ee4420037b1e628c2914dac9b9c60385fb0d4542a9bf7bfcbc4d955ca1ead653d8bf6f9309f793072d7de604b",
+			"market inmate woman federal elevator impact brisk essay increase buzz evidence fine",
+			dict, entropy1hex);
+
+		checkBinMnemonic(entropy2, password, "d73f64bcc93f92006cd539b7fd20456fdcef8e28b13e48f5edad4d59796712ec094e24df72b50c86fd16a4d3284aa7cd31a35c1353e4e0ac187d3f709621193d",
+			"spoon sing upset another glass nasty horror such nerve damp equip loop virtual toe deposit prefer half poet time calm believe adjust coral lens",
+			dict, entropy2hex);
+	}
+
+	SECTION("WITHOUT PASSWORD") {
+		checkBinMnemonic(entropy1, "", "5ef6c88257b54ccd331c5f82c9387b3edbe32da4dfb398684b9bea71befab76b7ac6d7e43205e8748a4ef5d1da513d41f9671b8c36f059c8c9efe0233f6ad358",
+			"market inmate woman federal elevator impact brisk essay increase buzz evidence fine",
+			dict, entropy1hex);
+
+		checkBinMnemonic(entropy2, "", "d26e5a46cc8aaf597cad072a4e2333d19d2c0c395eb8d0a7fb47c36958618bc02cc548958920fcd1962bdb84757f82dfbaf89f41cfbe5c2ccbaba270fe939ce4",
+			"spoon sing upset another glass nasty horror such nerve damp equip loop virtual toe deposit prefer half poet time calm believe adjust coral lens",
+			dict, entropy2hex);
+	}
 }
